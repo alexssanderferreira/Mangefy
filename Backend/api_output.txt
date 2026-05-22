@@ -1,0 +1,188 @@
+Usando as configurações de inicialização de Mangefy.API\Properties\launchSettings.json...
+Compilando...
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://0.0.0.0:5184
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\Alex\Desktop\Projeto\Mangefy\Backend\Mangefy.API
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (19ms) [Parameters=[@__slug_0='?'], CommandType='Text', CommandTimeout='30']
+      SELECT t."Id", t."BusinessTypeId", t."CreatedAt", t."CreatedByEmployeeId", t."LogoUrl", t."Name", t."OwnerId", t."PlanId", t."Slug", t."Status", t."SuspendedAt", t."Timezone", t."TrialEndsAt", t."UpdatedAt", t."UpdatedByEmployeeId", t."Address_Bairro", t."Address_Cep", t."Address_Cidade", t."Address_Complemento", t."Address_Logradouro", t."Address_Numero", t."Address_Uf", t."Email", t."Phone"
+      FROM "Tenants" AS t
+      WHERE t."Slug" = @__slug_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@__tenantId_0='?' (DbType = Guid), @__email_1='?'], CommandType='Text', CommandTimeout='30']
+      SELECT e."Id", e."CreatedAt", e."CreatedByEmployeeId", e."LastLoginAt", e."Name", e."PasswordHash", e.xmin, e."Status", e."TemporaryAccessUntil", e."TenantId", e."TenantRoleId", e."UpdatedAt", e."UpdatedByEmployeeId", e."Email"
+      FROM "Employees" AS e
+      WHERE e."TenantId" = @__tenantId_0 AND e."Email" = @__email_1
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@__email_0='?'], CommandType='Text', CommandTimeout='30']
+      SELECT o."Id", o."CreatedAt", o."CreatedByEmployeeId", o."DocumentNumber", o."DocumentType", o."LastLoginAt", o."Name", o."Notes", o."PasswordHash", o."Status", o."UpdatedAt", o."UpdatedByEmployeeId", o."Address_Bairro", o."Address_Cep", o."Address_Cidade", o."Address_Complemento", o."Address_Logradouro", o."Address_Numero", o."Address_Uf", o."Email", o."Phone"
+      FROM "Owners" AS o
+      WHERE o."Email" = @__email_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p11='?' (DbType = Guid), @p0='?' (DbType = DateTime), @p1='?' (DbType = Guid), @p2='?', @p3='?', @p4='?' (DbType = DateTime), @p5='?', @p6='?', @p7='?', @p8='?', @p9='?' (DbType = DateTime), @p10='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      UPDATE "Owners" SET "CreatedAt" = @p0, "CreatedByEmployeeId" = @p1, "DocumentNumber" = @p2, "DocumentType" = @p3, "LastLoginAt" = @p4, "Name" = @p5, "Notes" = @p6, "PasswordHash" = @p7, "Status" = @p8, "UpdatedAt" = @p9, "UpdatedByEmployeeId" = @p10
+      WHERE "Id" = @p11;
+warn: Microsoft.EntityFrameworkCore.Query[20504]
+      Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[@__id_0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      SELECT t."Id", t."CreatedAt", t."CreatedByEmployeeId", t."IsActive", t."IsDefault", t."Name", t."TenantId", t."UpdatedAt", t."UpdatedByEmployeeId", t0."Id", t0."CreatedAt", t0."CreatedByEmployeeId", t0."Description", t0."DisplayOrder", t0."IsActive", t0."MenuId", t0."Name", t0."TenantId", t0."UpdatedAt", t0."UpdatedByEmployeeId", t0."Id0", t0."CategoryId", t0."CreatedAt0", t0."CreatedByEmployeeId0", t0."Description0", t0."ImageUrl", t0."MenuCategoryId", t0."Name0", t0."PromotionValidUntil", t0."RequiresKds", t0."Station", t0."Status", t0."TenantId0", t0."UpdatedAt0", t0."UpdatedByEmployeeId0", t0."Price", t0."PriceCurrency", t0."Id00", t0."ChangedAt", t0."ChangedByEmployeeId", t0."CreatedAt00", t0."CreatedByEmployeeId00", t0."MenuItemId", t0."Reason", t0."UpdatedAt00", t0."UpdatedByEmployeeId00", t0."NewPrice", t0."NewPriceCurrency", t0."PreviousPrice", t0."PreviousPriceCurrency", t0."PromotionalPrice", t0."PromotionalPriceCurrency", t0."MenuItemId0", t0."StockItemId", t0."Quantity", t."Schedule_EndTime", t."Schedule_StartTime", t."Schedule_ActiveDays"
+      FROM (
+          SELECT m."Id", m."CreatedAt", m."CreatedByEmployeeId", m."IsActive", m."IsDefault", m."Name", m."TenantId", m."UpdatedAt", m."UpdatedByEmployeeId", m."Schedule_EndTime", m."Schedule_StartTime", m."Schedule_ActiveDays"
+          FROM "Menus" AS m
+          WHERE m."Id" = @__id_0
+          LIMIT 1
+      ) AS t
+      LEFT JOIN (
+          SELECT m0."Id", m0."CreatedAt", m0."CreatedByEmployeeId", m0."Description", m0."DisplayOrder", m0."IsActive", m0."MenuId", m0."Name", m0."TenantId", m0."UpdatedAt", m0."UpdatedByEmployeeId", t1."Id" AS "Id0", t1."CategoryId", t1."CreatedAt" AS "CreatedAt0", t1."CreatedByEmployeeId" AS "CreatedByEmployeeId0", t1."Description" AS "Description0", t1."ImageUrl", t1."MenuCategoryId", t1."Name" AS "Name0", t1."PromotionValidUntil", t1."RequiresKds", t1."Station", t1."Status", t1."TenantId" AS "TenantId0", t1."UpdatedAt" AS "UpdatedAt0", t1."UpdatedByEmployeeId" AS "UpdatedByEmployeeId0", t1."Price", t1."PriceCurrency", t1."Id0" AS "Id00", t1."ChangedAt", t1."ChangedByEmployeeId", t1."CreatedAt0" AS "CreatedAt00", t1."CreatedByEmployeeId0" AS "CreatedByEmployeeId00", t1."MenuItemId", t1."Reason", t1."UpdatedAt0" AS "UpdatedAt00", t1."UpdatedByEmployeeId0" AS "UpdatedByEmployeeId00", t1."NewPrice", t1."NewPriceCurrency", t1."PreviousPrice", t1."PreviousPriceCurrency", t1."PromotionalPrice", t1."PromotionalPriceCurrency", t1."MenuItemId0", t1."StockItemId", t1."Quantity"
+          FROM "MenuCategories" AS m0
+          LEFT JOIN (
+              SELECT m1."Id", m1."CategoryId", m1."CreatedAt", m1."CreatedByEmployeeId", m1."Description", m1."ImageUrl", m1."MenuCategoryId", m1."Name", m1."PromotionValidUntil", m1."RequiresKds", m1."Station", m1."Status", m1."TenantId", m1."UpdatedAt", m1."UpdatedByEmployeeId", m1."Price", m1."PriceCurrency", m2."Id" AS "Id0", m2."ChangedAt", m2."ChangedByEmployeeId", m2."CreatedAt" AS "CreatedAt0", m2."CreatedByEmployeeId" AS "CreatedByEmployeeId0", m2."MenuItemId", m2."Reason", m2."UpdatedAt" AS "UpdatedAt0", m2."UpdatedByEmployeeId" AS "UpdatedByEmployeeId0", m2."NewPrice", m2."NewPriceCurrency", m2."PreviousPrice", m2."PreviousPriceCurrency", m1."PromotionalPrice", m1."PromotionalPriceCurrency", m3."MenuItemId" AS "MenuItemId0", m3."StockItemId", m3."Quantity"
+              FROM "MenuItems" AS m1
+              LEFT JOIN "MenuItemPriceHistory" AS m2 ON m1."Id" = m2."MenuItemId"
+              LEFT JOIN "MenuItemRecipes" AS m3 ON m1."Id" = m3."MenuItemId"
+          ) AS t1 ON m0."Id" = t1."MenuCategoryId"
+      ) AS t0 ON t."Id" = t0."MenuId"
+      ORDER BY t."Id", t0."Id", t0."Id0", t0."Id00", t0."MenuItemId0"
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[@p1='?' (DbType = Guid), @p0='?' (DbType = DateTime), @p2='?' (DbType = Guid), @p3='?' (DbType = Guid), @p4='?' (DbType = DateTime), @p5='?' (DbType = Guid), @p6='?', @p7='?', @p8='?' (DbType = Guid), @p9='?', @p10='?' (DbType = DateTime), @p11='?' (DbType = Boolean), @p12='?', @p13='?', @p14='?' (DbType = Guid), @p15='?' (DbType = DateTime), @p16='?' (DbType = Guid), @p18='?' (DbType = Guid), @p17='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      UPDATE "MenuCategories" SET "UpdatedAt" = @p0
+      WHERE "Id" = @p1;
+      INSERT INTO "MenuItems" ("Id", "CategoryId", "CreatedAt", "CreatedByEmployeeId", "Description", "ImageUrl", "MenuCategoryId", "Name", "PromotionValidUntil", "RequiresKds", "Station", "Status", "TenantId", "UpdatedAt", "UpdatedByEmployeeId")
+      VALUES (@p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16);
+      UPDATE "Menus" SET "UpdatedAt" = @p17
+      WHERE "Id" = @p18;
+fail: Microsoft.EntityFrameworkCore.Update[10000]
+      An exception occurred in the database while saving changes for context type 'Mangefy.Infrastructure.Persistence.MangefyDbContext'.
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---> Npgsql.PostgresException (0x80004005): 23502: o valor nulo na coluna "Price" da relação "MenuItems" viola a restrição de não-nulo
+      
+      DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERRO
+          SqlState: 23502
+          MessageText: o valor nulo na coluna "Price" da relação "MenuItems" viola a restrição de não-nulo
+          Detail: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+          SchemaName: public
+          TableName: MenuItems
+          ColumnName: Price
+          File: execMain.c
+          Line: 2219
+          Routine: ReportNotNullViolationError
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---> Npgsql.PostgresException (0x80004005): 23502: o valor nulo na coluna "Price" da relação "MenuItems" viola a restrição de não-nulo
+      
+      DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERRO
+          SqlState: 23502
+          MessageText: o valor nulo na coluna "Price" da relação "MenuItems" viola a restrição de não-nulo
+          Detail: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+          SchemaName: public
+          TableName: MenuItems
+          ColumnName: Price
+          File: execMain.c
+          Line: 2219
+          Routine: ReportNotNullViolationError
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+fail: Mangefy.API.Middleware.ExceptionHandlingMiddleware[0]
+      Erro não tratado: An error occurred while saving the entity changes. See the inner exception for details.
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---> Npgsql.PostgresException (0x80004005): 23502: o valor nulo na coluna "Price" da relação "MenuItems" viola a restrição de não-nulo
+      
+      DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERRO
+          SqlState: 23502
+          MessageText: o valor nulo na coluna "Price" da relação "MenuItems" viola a restrição de não-nulo
+          Detail: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+          SchemaName: public
+          TableName: MenuItems
+          ColumnName: Price
+          File: execMain.c
+          Line: 2219
+          Routine: ReportNotNullViolationError
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Mangefy.Infrastructure.Persistence.UnitOfWork.SaveChangesAsync(CancellationToken ct) in C:\Users\Alex\Desktop\Projeto\Mangefy\Backend\Mangefy.Infrastructure\Persistence\UnitOfWork.cs:line 31
+         at Mangefy.Application.Menus.Commands.AddMenuItem.AddMenuItemCommandHandler.Handle(AddMenuItemCommand request, CancellationToken cancellationToken) in C:\Users\Alex\Desktop\Projeto\Mangefy\Backend\Mangefy.Application\Menus\Commands\AddMenuItem\AddMenuItemCommandHandler.cs:line 33
+         at Mangefy.Application.Common.Behaviors.ValidationBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in C:\Users\Alex\Desktop\Projeto\Mangefy\Backend\Mangefy.Application\Common\Behaviors\ValidationBehavior.cs:line 29
+         at Mangefy.Application.Common.Behaviors.IdempotencyBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in C:\Users\Alex\Desktop\Projeto\Mangefy\Backend\Mangefy.Application\Common\Behaviors\IdempotencyBehavior.cs:line 38
+         at Mangefy.API.Controllers.MenusController.AddItem(Guid tenantId, Guid menuId, Guid categoryId, AddItemRequest request, CancellationToken ct) in C:\Users\Alex\Desktop\Projeto\Mangefy\Backend\Mangefy.API\Controllers\MenusController.cs:line 98
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+         at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+         at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+         at Mangefy.API.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in C:\Users\Alex\Desktop\Projeto\Mangefy\Backend\Mangefy.API\Middleware\ExceptionHandlingMiddleware.cs:line 24

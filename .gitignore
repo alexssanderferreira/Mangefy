@@ -1,0 +1,120 @@
+## .NET / Visual Studio
+
+# Build outputs
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docview
+
+# User-specific files
+*.rsuser
+*.user
+
+# Rider
+.idea/
+*.sln.iml
+
+# Rider & VSCode build results
+out/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+!**/[Pp]ackages/build/
+*.nuspec
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# MSBuild
+project.lock.json
+project.fragment.lock.json
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+publish/
+
+# dotnet test
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+# Publish profiles
+**/Properties/PublishProfiles/
+
+# Dotnet Tools
+.config/dotnet-tools.json
+
+## Secrets & environment
+
+# Never commit real secrets
+appsettings.*.local.json
+secrets.json
+*.pfx
+*.p12
+.env
+.env.*
+!.env.example
+
+# User secrets are stored outside repo by the SDK
+# But guard against accidental override files
+appsettings.Production.json
+
+## Node / Angular
+node_modules/
+dist/
+.angular/
+*.tsbuildinfo
+
+## Local / sensitive
+credenciais.md
+.claude/
+
+## OS
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk

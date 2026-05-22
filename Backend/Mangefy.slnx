@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Mangefy.API/Mangefy.API.csproj" />
+  <Project Path="Mangefy.Application/Mangefy.Application.csproj" />
+  <Project Path="Mangefy.Domain/Mangefy.Domain.csproj" />
+  <Project Path="Mangefy.Infrastructure/Mangefy.Infrastructure.csproj" />
+</Solution>
