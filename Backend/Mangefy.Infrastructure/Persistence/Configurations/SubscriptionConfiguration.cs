@@ -1,3 +1,4 @@
+using Mangefy.Domain.Common.ValueObjects;
 using Mangefy.Domain.Platform.Subscriptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -20,11 +21,16 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
             invoice.Property(x => x.PaymentReference).HasMaxLength(200);
             invoice.Property(x => x.Notes).HasMaxLength(1000);
 
-            invoice.OwnsOne(x => x.Amount, m =>
-            {
-                m.Property(x => x.Amount).HasColumnName("Amount").HasColumnType("decimal(10,2)");
-                m.Property(x => x.Currency).HasColumnName("Currency").HasMaxLength(3);
-            });
+            // Usar ValueConverter em vez de OwnsOne para evitar o bug do EF Core 8
+            // onde OwnsOne dentro de OwnsMany gera UPDATE separado → DbUpdateConcurrencyException
+            invoice.Property(x => x.Amount)
+                .HasConversion(
+                    m => m.Amount,
+                    v => Money.Create(v, "BRL"))
+                .HasColumnName("Amount")
+                .HasColumnType("decimal(10,2)");
+
+            invoice.Ignore("Currency");
         });
     }
 }

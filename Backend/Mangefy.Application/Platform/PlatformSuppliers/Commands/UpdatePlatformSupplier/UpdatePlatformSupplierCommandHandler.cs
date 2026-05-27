@@ -22,7 +22,8 @@ public sealed class UpdatePlatformSupplierCommandHandler : IRequestHandler<Updat
         var supplier = await _suppliers.GetByIdAsync(request.SupplierId, cancellationToken)
             ?? throw new NotFoundException(nameof(PlatformSupplier), request.SupplierId);
 
-        supplier.Update(request.Name, request.SupplierCategoryId, request.Cnpj, request.Website, request.Email, request.Phone, request.Description);
+        supplier.Update(request.Name, request.SupplierCategoryId, request.Cnpj, request.Website, request.Email, request.Phone, request.Description,
+            request.Cep, request.Logradouro, request.Numero, request.Bairro, request.Cidade, request.Uf, request.Complemento, request.BusinessHours);
         await _suppliers.UpdateAsync(supplier, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
     }

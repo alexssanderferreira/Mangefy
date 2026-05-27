@@ -31,6 +31,16 @@ public sealed class CreateOwnerCommandHandler : IRequestHandler<CreateOwnerComma
             throw new ConflictException($"Já existe um owner com o e-mail '{request.Email}'.");
 
         var owner = Owner.Create(request.Name, request.Email);
+
+        if (!string.IsNullOrWhiteSpace(request.Phone) || !string.IsNullOrWhiteSpace(request.DocumentNumber))
+        {
+            var docType = Enum.TryParse<OwnerDocumentType>(request.DocumentType, out var dt) ? dt : (OwnerDocumentType?)null;
+            owner.UpdateContactInfo(request.Phone, docType, request.DocumentNumber, null);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Cep) || !string.IsNullOrWhiteSpace(request.Logradouro))
+            owner.SetAddress(request.Cep, request.Logradouro, request.Numero, request.Bairro, request.Cidade, request.Uf, request.Complemento);
+
         await _owners.AddAsync(owner, cancellationToken);
 
         var token = OwnerActivationToken.Create(owner.Id, TimeSpan.FromHours(48));

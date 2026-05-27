@@ -13,4 +13,12 @@ public sealed record PlatformSupplierDto(
     string? Email,
     string? Phone,
     string? Description,
-    bool IsActive);
+    bool IsActive,
+    string? AddressCep,
+    string? AddressLogradouro,
+    string? AddressNumero,
+    string? AddressComplemento,
+    string? AddressBairro,
+    string? AddressCidade,
+    string? AddressUf,
+    string? BusinessHours);

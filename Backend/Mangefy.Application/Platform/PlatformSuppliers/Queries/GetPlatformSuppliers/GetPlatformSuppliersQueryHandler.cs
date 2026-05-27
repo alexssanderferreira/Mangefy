@@ -17,7 +17,9 @@ public sealed class GetPlatformSuppliersQueryHandler : IRequestHandler<GetPlatfo
 
         return list.Select(s => new PlatformSupplierDto(
             s.Id, s.Name, s.Cnpj, s.SupplierCategoryId,
-            s.Website, s.Email?.Value, s.Phone?.Value,
-            s.Description, s.IsActive)).ToList();
+            s.Website, s.Email?.Value, s.Phone?.Value, s.Description, s.IsActive,
+            s.Address?.Cep, s.Address?.Logradouro, s.Address?.Numero, s.Address?.Complemento,
+            s.Address?.Bairro, s.Address?.Cidade, s.Address?.Uf,
+            s.BusinessHours)).ToList();
     }
 }

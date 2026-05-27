@@ -6,6 +6,7 @@ using Mangefy.Application.Tenants.Commands.CreateTenant;
 using Mangefy.Application.Tenants.Commands.ReactivateTenant;
 using Mangefy.Application.Tenants.Commands.SuspendTenant;
 using Mangefy.Application.Tenants.Commands.UpdateTenant;
+using Mangefy.Application.Employees.Queries.GetEmployeesByTenant;
 using Mangefy.Application.Tenants.Queries.GetTenantById;
 using Mangefy.Application.Tenants.Queries.ListTenants;
 using MediatR;
@@ -85,6 +86,7 @@ public sealed class TenantsController : ControllerBase
         await _sender.Send(new CancelTenantCommand(id), ct);
         return NoContent();
     }
+
 }
 
 public sealed record UpdateTenantRequest(

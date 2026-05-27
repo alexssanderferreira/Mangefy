@@ -20,7 +20,9 @@ public sealed class CreatePlatformSupplierCommandHandler : IRequestHandler<Creat
     {
         var supplier = PlatformSupplier.Create(
             request.Name, request.SupplierCategoryId,
-            request.Cnpj, request.Website, request.Email, request.Phone, request.Description);
+            request.Cnpj, request.Website, request.Email, request.Phone, request.Description,
+            request.Cep, request.Logradouro, request.Numero, request.Bairro, request.Cidade, request.Uf, request.Complemento,
+            request.BusinessHours);
 
         await _suppliers.AddAsync(supplier, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);

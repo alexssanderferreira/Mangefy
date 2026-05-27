@@ -47,26 +47,26 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
           <div class="tenant-meta">
             <div class="tenant-avatar">{{ tenant()!.name.charAt(0).toUpperCase() }}</div>
             <div>
-              <h1 class="tenant-name">{{ tenant()!.name }}</h1>
+              <div class="tenant-name-row">
+                <h1 class="tenant-name">{{ tenant()!.name }}</h1>
+                <span class="badge badge-{{ tenant()!.status }}">{{ statusLabel(tenant()!.status) }}</span>
+              </div>
               <div class="tenant-slug">{{ tenant()!.slug }}</div>
             </div>
           </div>
           <div class="header-right">
-            <span class="badge badge-{{ tenant()!.status }}">{{ statusLabel(tenant()!.status) }}</span>
-            <div class="action-buttons">
-              @if (tenant()!.status === 'TrialPeriod') {
-                <button class="btn btn-success" (click)="doAction('activate')" [disabled]="acting()">{{ acting() === 'activate' ? '...' : 'Ativar' }}</button>
-              }
-              @if (tenant()!.status === 'Active' || tenant()!.status === 'TrialPeriod') {
-                <button class="btn btn-warn" (click)="doAction('suspend')" [disabled]="acting()">{{ acting() === 'suspend' ? '...' : 'Suspender' }}</button>
-              }
-              @if (tenant()!.status === 'Suspended') {
-                <button class="btn btn-success" (click)="doAction('reactivate')" [disabled]="acting()">{{ acting() === 'reactivate' ? '...' : 'Reativar' }}</button>
-              }
-              @if (tenant()!.status !== 'Cancelled') {
-                <button class="btn btn-danger-outline" (click)="cancelModal.set(true)" [disabled]="acting()">Cancelar conta</button>
-              }
-            </div>
+            @if (tenant()!.status === 'TrialPeriod') {
+              <button class="btn btn-success" (click)="doAction('activate')" [disabled]="acting()">{{ acting() === 'activate' ? '...' : 'Ativar' }}</button>
+            }
+            @if (tenant()!.status === 'Active' || tenant()!.status === 'TrialPeriod') {
+              <button class="btn btn-warn" (click)="doAction('suspend')" [disabled]="acting()">{{ acting() === 'suspend' ? '...' : 'Suspender' }}</button>
+            }
+            @if (tenant()!.status === 'Suspended') {
+              <button class="btn btn-success" (click)="doAction('reactivate')" [disabled]="acting()">{{ acting() === 'reactivate' ? '...' : 'Reativar' }}</button>
+            }
+            @if (tenant()!.status !== 'Cancelled') {
+              <button class="btn btn-danger-outline" (click)="cancelModal.set(true)" [disabled]="acting()">Cancelar conta</button>
+            }
           </div>
         </div>
 
@@ -379,10 +379,10 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
       display: flex; align-items: center; justify-content: center;
       font-size: 22px; font-weight: 800; flex-shrink: 0;
     }
+    .tenant-name-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .tenant-name { font-size: 22px; font-weight: 700; color: #111; }
-    .tenant-slug { font-size: 13px; color: #aaa; font-family: monospace; margin-top: 2px; }
-    .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tenant-slug { font-size: 13px; color: #aaa; font-family: monospace; margin-top: 4px; }
+    .header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
     /* Tabs */
     .tabs { display: flex; border-bottom: 2px solid #f0f0f3; margin-bottom: 20px; }

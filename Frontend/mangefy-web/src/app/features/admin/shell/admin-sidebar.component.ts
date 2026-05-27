@@ -1,14 +1,16 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LayoutService } from './layout.service';
+import { SubscriptionService } from '../subscriptions/subscription.service';
 
 interface NavItem {
   label: string;
   route: string;
   icon: SafeHtml;
   badge?: number;
+  queryParams?: Record<string, string>;
 }
 
 interface NavGroup {
@@ -40,12 +42,14 @@ interface NavGroup {
           <div class="nav-group">
             <span class="nav-group-label">{{ group.label }}</span>
             @for (item of group.items; track item.route) {
-              <a class="nav-item" [routerLink]="['/admin', item.route]" routerLinkActive="active" (click)="layout.close()">
+              <a class="nav-item" [routerLink]="['/admin', item.route]" [queryParams]="item.queryParams ?? {}" routerLinkActive="active" (click)="layout.close()">
                 <span class="nav-item-left">
                   <span class="nav-icon" [innerHTML]="item.icon"></span>
                   <span class="nav-label">{{ item.label }}</span>
                 </span>
-                @if (item.badge) {
+                @if (item.route === 'overdue' && overdueCount() > 0) {
+                  <span class="nav-badge">{{ overdueCount() }}</span>
+                } @else if (item.badge && item.route !== 'overdue') {
                   <span class="nav-badge">{{ item.badge }}</span>
                 }
               </a>
@@ -265,13 +269,23 @@ interface NavGroup {
     }
   `]
 })
-export class AdminSidebarComponent {
+export class AdminSidebarComponent implements OnInit {
   private auth      = inject(AuthService);
   private sanitizer = inject(DomSanitizer);
+  private subscriptionSvc = inject(SubscriptionService);
   layout = inject(LayoutService);
+
+  overdueCount = signal(0);
 
   get userName() { return 'Admin'; }
   get initial()  { return 'A'; }
+
+  ngOnInit() {
+    this.subscriptionSvc.getOverdue().subscribe({
+      next: data => this.overdueCount.set(data.length),
+      error: () => {}
+    });
+  }
 
   private svg(html: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(html);
@@ -308,8 +322,7 @@ export class AdminSidebarComponent {
         },
         {
           label: 'Inadimplências', route: 'overdue',
-          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`),
-          badge: 3
+          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`)
         },
       ]
     },
@@ -321,16 +334,12 @@ export class AdminSidebarComponent {
           icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`)
         },
         {
-          label: 'Matriz Features', route: 'feature-sets',
-          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`)
-        },
-        {
           label: 'Fornecedores', route: 'suppliers',
           icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`)
         },
         {
-          label: 'Categorias', route: 'supplier-categories',
-          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`)
+          label: 'Matriz de Features', route: 'feature-matrix',
+          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`)
         },
       ]
     },

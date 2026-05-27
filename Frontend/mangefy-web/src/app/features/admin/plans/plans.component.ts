@@ -216,81 +216,102 @@ function emptyForm(): PlanForm {
       <div class="overlay" (click)="closeDrawer()"></div>
       <aside class="drawer">
         <div class="drawer-header">
-          <h3 class="drawer-title">{{ drawerMode() === 'create' ? 'Novo Plano' : 'Editar Plano' }}</h3>
+          <div class="drawer-header-left">
+            <div class="drawer-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div>
+              <h3 class="drawer-title">{{ drawerMode() === 'create' ? 'Novo Plano' : 'Editar Plano' }}</h3>
+              <p class="drawer-subtitle">{{ drawerMode() === 'create' ? 'Configure o novo plano de assinatura' : editingPlan()?.name }}</p>
+            </div>
+          </div>
           <button class="btn-close" (click)="closeDrawer()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
 
         <div class="drawer-body">
           @if (drawerError()) {
-            <div class="alert-error mb-16">{{ drawerError() }}</div>
+            <div class="alert-error">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ drawerError() }}
+            </div>
           }
 
-          <!-- Nome (só criação) -->
-          @if (drawerMode() === 'create') {
-            <div class="field">
-              <label class="field-label">Nome do plano *</label>
-              <input class="field-input" [(ngModel)]="form.name" placeholder="Ex: Profissional" maxlength="100" />
+          <!-- Identificação -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Identificação
             </div>
+            @if (drawerMode() === 'create') {
+              <div class="field">
+                <label class="field-label">Nome do plano <span class="req">*</span></label>
+                <input class="field-input" [(ngModel)]="form.name" placeholder="Ex: Profissional" maxlength="100" />
+              </div>
+            } @else {
+              <div class="field">
+                <label class="field-label">Nome do plano</label>
+                <div class="field-static">{{ editingPlan()?.name }}</div>
+              </div>
+            }
             <div class="field">
               <label class="field-label">Descrição</label>
               <input class="field-input" [(ngModel)]="form.description" placeholder="Breve descrição do plano" maxlength="300" />
             </div>
-          } @else {
-            <div class="field">
-              <label class="field-label">Nome do plano</label>
-              <div class="field-static">{{ editingPlan()?.name }}</div>
-            </div>
-            <div class="field">
-              <label class="field-label">Descrição</label>
-              <input class="field-input" [(ngModel)]="form.description" placeholder="Breve descrição do plano" maxlength="300" />
-            </div>
-          }
+          </div>
 
-          <div class="field">
-            <label class="field-label">Preço mensal *</label>
-            <div class="price-input-wrap">
-              <span class="price-prefix">R$</span>
-              <input
-                class="field-input price-input"
-                type="text"
-                inputmode="numeric"
-                [value]="priceDisplay()"
-                (input)="onPriceInput($event)"
-                placeholder="0,00"
-              />
+          <!-- Preço -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Preço
+            </div>
+            <div class="field">
+              <label class="field-label">Preço mensal <span class="req">*</span></label>
+              <div class="price-input-wrap">
+                <span class="price-prefix">R$</span>
+                <input class="field-input price-input" type="text" inputmode="numeric" [value]="priceDisplay()" (input)="onPriceInput($event)" placeholder="0,00" />
+              </div>
             </div>
           </div>
 
-          <div class="field-group">
-            <div class="field">
-              <label class="field-label">Máx. mesas *</label>
-              <input class="field-input" type="text" inputmode="numeric" [(ngModel)]="form.maxTables" placeholder="0" (keydown)="onlyDigits($event)" />
+          <!-- Limites -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              Limites do plano
             </div>
-            <div class="field">
-              <label class="field-label">Máx. itens menu *</label>
-              <input class="field-input" type="text" inputmode="numeric" [(ngModel)]="form.maxMenuItems" placeholder="0" (keydown)="onlyDigits($event)" />
+            <div class="form-grid-2">
+              <div class="field">
+                <label class="field-label">Máx. mesas <span class="req">*</span></label>
+                <input class="field-input" type="text" inputmode="numeric" [(ngModel)]="form.maxTables" placeholder="0" (keydown)="onlyDigits($event)" />
+              </div>
+              <div class="field">
+                <label class="field-label">Máx. itens menu <span class="req">*</span></label>
+                <input class="field-input" type="text" inputmode="numeric" [(ngModel)]="form.maxMenuItems" placeholder="0" (keydown)="onlyDigits($event)" />
+              </div>
+              <div class="field">
+                <label class="field-label">Máx. usuários <span class="req">*</span></label>
+                <input class="field-input" type="text" inputmode="numeric" [(ngModel)]="form.maxUsers" placeholder="0" (keydown)="onlyDigits($event)" />
+              </div>
+              <div class="field">
+                <label class="field-label">Cargos personalizados</label>
+                <input class="field-input" type="text" inputmode="numeric" [(ngModel)]="form.maxCustomRoles" placeholder="0" (keydown)="onlyDigits($event)" />
+              </div>
             </div>
           </div>
-
-          <div class="field-group">
-            <div class="field">
-              <label class="field-label">Máx. utilizadores *</label>
-              <input class="field-input" type="text" inputmode="numeric" [(ngModel)]="form.maxUsers" placeholder="0" (keydown)="onlyDigits($event)" />
-            </div>
-            <div class="field">
-              <label class="field-label">Cargos personalizados</label>
-              <input class="field-input" type="text" inputmode="numeric" [(ngModel)]="form.maxCustomRoles" placeholder="0" (keydown)="onlyDigits($event)" />
-            </div>
-          </div>
-
         </div>
 
         <div class="drawer-footer">
           <button class="btn btn-ghost" (click)="closeDrawer()">Cancelar</button>
           <button class="btn btn-primary" (click)="submit()" [disabled]="saving()">
-            {{ saving() ? 'Salvando...' : (drawerMode() === 'create' ? 'Criar Plano' : 'Salvar Alterações') }}
+            @if (saving()) {
+              <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              Salvando...
+            } @else {
+              {{ drawerMode() === 'create' ? 'Criar Plano' : 'Salvar Alterações' }}
+            }
           </button>
         </div>
       </aside>
@@ -520,45 +541,33 @@ function emptyForm(): PlanForm {
       to   { transform: translateX(0); }
     }
 
-    .drawer-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 24px; border-bottom: 1px solid #f0f0f3; flex-shrink: 0;
-    }
-    .drawer-title { font-size: 16px; font-weight: 700; color: #111; }
+    .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #f0f0f3; flex-shrink: 0; }
+    .drawer-header-left { display: flex; align-items: center; gap: 12px; }
+    .drawer-icon { width: 36px; height: 36px; border-radius: 10px; background: color-mix(in srgb, var(--color-brand) 10%, transparent); color: var(--color-brand); display: flex; align-items: center; justify-content: center; }
+    .drawer-title { font-size: 15px; font-weight: 700; color: #111; }
+    .drawer-subtitle { font-size: 11px; color: #aaa; margin-top: 1px; }
+    .btn-close { width: 30px; height: 30px; border-radius: 7px; border: 1px solid #e8e8ec; background: #fff; color: #888; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .12s; &:hover { background: #f4f4f5; } }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+    .drawer-footer { padding: 14px 20px; border-top: 1px solid #f0f0f3; display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0; background: #fafafa; }
 
-    .btn-close {
-      width: 32px; height: 32px; border-radius: 8px;
-      border: none; background: #f4f4f5; color: #666;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: background .15s;
-      &:hover { background: #ebebef; }
-    }
+    /* Form sections */
+    .form-section { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: #fafafa; border: 1px solid #f0f0f3; border-radius: 10px; }
+    .form-section-header { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #999; svg { color: var(--color-brand); } }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-    .drawer-body {
-      flex: 1; overflow-y: auto;
-      padding: 24px;
-      display: flex; flex-direction: column; gap: 16px;
-    }
-
-    .drawer-footer {
-      padding: 16px 24px; border-top: 1px solid #f0f0f3;
-      display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0;
-    }
-
-    /* ── Form fields ── */
-    .field { display: flex; flex-direction: column; gap: 6px; }
-
+    /* Form fields */
+    .field { display: flex; flex-direction: column; gap: 5px; }
     .field-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-    .field-label { font-size: 12px; font-weight: 600; color: #555; }
-
+    .field-label { font-size: 11px; font-weight: 600; color: #666; }
+    .req { color: var(--color-brand); }
     .field-input {
-      padding: 9px 12px; border: 1px solid #e8e8ec;
-      border-radius: 8px; font-size: 13px; color: #111;
-      outline: none; transition: border-color .15s;
-      &:focus { border-color: var(--color-brand); }
+      width: 100%; padding: 8px 10px; border: 1px solid #e8e8ec; border-radius: 7px;
+      font-size: 13px; color: #111; outline: none; transition: border-color .15s, box-shadow .15s; background: #fff; box-sizing: border-box;
+      &:focus { border-color: var(--color-brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 12%, transparent); }
       &::placeholder { color: #ccc; }
     }
+    @keyframes spinAnim { to { transform: rotate(360deg); } }
+    .spin-icon { animation: spinAnim .8s linear infinite; transform-origin: center; }
 
     .price-input-wrap {
       display: flex; align-items: center;

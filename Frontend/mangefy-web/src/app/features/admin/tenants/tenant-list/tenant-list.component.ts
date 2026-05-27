@@ -173,113 +173,136 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
       <div class="overlay" (click)="closeDrawer()"></div>
       <aside class="drawer">
         <div class="drawer-header">
-          <h3 class="drawer-title">Novo Estabelecimento</h3>
+          <div class="drawer-header-left">
+            <div class="drawer-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div>
+              <h3 class="drawer-title">Novo Estabelecimento</h3>
+              <p class="drawer-subtitle">Preencha os dados do estabelecimento</p>
+            </div>
+          </div>
           <button class="btn-close" (click)="closeDrawer()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
 
         <div class="drawer-body">
           @if (drawerError()) {
-            <div class="alert-error mb-16">{{ drawerError() }}</div>
+            <div class="alert-error">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ drawerError() }}
+            </div>
           }
 
-          <div class="field">
-            <label class="field-label">Nome do estabelecimento *</label>
-            <input class="field-input" [(ngModel)]="form.name" (ngModelChange)="onNameChange($event)" placeholder="Ex: Pizzaria Bella Napoli" maxlength="100" />
-          </div>
-
-          <div class="field">
-            <label class="field-label">
-              Slug *
-              <span class="field-hint">Identificador único na URL</span>
-            </label>
-            <div class="slug-wrap" [class.slug-error]="slugTouched && !slugValid()">
-              <span class="slug-prefix">mgf/</span>
-              <input class="field-input slug-input" [(ngModel)]="form.slug" (ngModelChange)="onSlugChange($event)" placeholder="bella-napoli" maxlength="60" />
+          <!-- Seção: Identificação -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Identificação
             </div>
-            @if (slugTouched && !slugValid()) {
-              <span class="field-error">Apenas letras minúsculas, números e hifens.</span>
-            }
-          </div>
-
-          <div class="field">
-            <label class="field-label">
-              Dono *
-              <span class="field-hint">Busque pelo nome ou e-mail</span>
-            </label>
-            <div class="owner-search-wrap" [class.focused]="ownerSearchFocused">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input class="owner-search-input"
-                [ngModel]="ownerSearchText()"
-                (ngModelChange)="onOwnerSearch($event)"
-                (focus)="ownerSearchFocused = true"
-                (blur)="onOwnerBlur()"
-                placeholder="Buscar dono..." />
-              @if (form.ownerId) {
-                <button class="owner-clear-btn" type="button" (mousedown)="clearOwner($event)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
+            <div class="field">
+              <label class="field-label">Nome do estabelecimento <span class="req">*</span></label>
+              <input class="field-input" [(ngModel)]="form.name" (ngModelChange)="onNameChange($event)" placeholder="Ex: Pizzaria Bella Napoli" maxlength="100" />
+            </div>
+            <div class="field">
+              <label class="field-label" style="display:flex;justify-content:space-between">
+                Slug <span class="req">*</span>
+                <span style="font-weight:400;color:#bbb;font-size:11px">Identificador único na URL</span>
+              </label>
+              <div class="slug-wrap" [class.slug-error]="slugTouched && !slugValid()">
+                <span class="slug-prefix">mgf/</span>
+                <input class="field-input slug-input" [(ngModel)]="form.slug" (ngModelChange)="onSlugChange($event)" placeholder="bella-napoli" maxlength="60" />
+              </div>
+              @if (slugTouched && !slugValid()) {
+                <span class="field-error">Apenas letras minúsculas, números e hifens.</span>
               }
             </div>
-            @if (ownerSearchFocused && ownerResults().length > 0) {
-              <div class="owner-dropdown">
-                @for (o of ownerResults(); track o.id) {
-                  <button class="owner-option" type="button" (mousedown)="selectOwner(o, $event)">
-                    <span class="owner-opt-avatar">{{ o.name.charAt(0).toUpperCase() }}</span>
-                    <span class="owner-opt-info">
-                      <span class="owner-opt-name">{{ o.name }}</span>
-                      <span class="owner-opt-email">{{ o.email }}</span>
-                    </span>
-                    <span class="badge badge-{{ o.status }} owner-opt-badge">{{ ownerStatusLabel(o.status) }}</span>
+            <div class="form-grid-2">
+              <div class="field">
+                <label class="field-label">Fuso horário</label>
+                <select class="field-input field-select" [(ngModel)]="form.timezone">
+                  <option value="America/Sao_Paulo">America/Sao_Paulo</option>
+                  <option value="America/Manaus">America/Manaus</option>
+                  <option value="America/Belem">America/Belem</option>
+                  <option value="America/Fortaleza">America/Fortaleza</option>
+                  <option value="America/Noronha">America/Noronha</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">Dias de trial</label>
+                <input class="field-input" type="text" inputmode="numeric" [(ngModel)]="form.trialDays" (keydown)="onlyDigits($event)" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Atribuição -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              Atribuição
+            </div>
+            <div class="field">
+              <label class="field-label" style="display:flex;justify-content:space-between">
+                Dono <span class="req">*</span>
+                <span style="font-weight:400;color:#bbb;font-size:11px">Busque pelo nome ou e-mail</span>
+              </label>
+              <div class="owner-search-wrap" [class.focused]="ownerSearchFocused">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input class="owner-search-input"
+                  [ngModel]="ownerSearchText()"
+                  (ngModelChange)="onOwnerSearch($event)"
+                  (focus)="ownerSearchFocused = true"
+                  (blur)="onOwnerBlur()"
+                  placeholder="Buscar dono..." />
+                @if (form.ownerId) {
+                  <button class="owner-clear-btn" type="button" (mousedown)="clearOwner($event)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 }
               </div>
-            }
-            @if (form.ownerId && selectedOwner()) {
-              <div class="owner-selected">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                {{ selectedOwner()!.name }} — {{ selectedOwner()!.email }}
-              </div>
-            }
-          </div>
-
-          <div class="field">
-            <label class="field-label">Plano *</label>
-            <select class="field-input" [(ngModel)]="form.planId">
-              <option value="">Selecione um plano...</option>
-              @for (p of plans(); track p.id) {
-                @if (p.status === 'Active') {
-                  <option [value]="p.id">{{ p.name }}</option>
-                }
+              @if (ownerSearchFocused && ownerResults().length > 0) {
+                <div class="owner-dropdown">
+                  @for (o of ownerResults(); track o.id) {
+                    <button class="owner-option" type="button" (mousedown)="selectOwner(o, $event)">
+                      <span class="owner-opt-avatar">{{ o.name.charAt(0).toUpperCase() }}</span>
+                      <span class="owner-opt-info">
+                        <span class="owner-opt-name">{{ o.name }}</span>
+                        <span class="owner-opt-email">{{ o.email }}</span>
+                      </span>
+                      <span class="badge badge-{{ o.status }} owner-opt-badge">{{ ownerStatusLabel(o.status) }}</span>
+                    </button>
+                  }
+                </div>
               }
-            </select>
-          </div>
-
-          <div class="field">
-            <label class="field-label">Tipo de negócio *</label>
-            <select class="field-input" [(ngModel)]="form.businessTypeId">
-              <option value="">Selecione o tipo...</option>
-              @for (bt of businessTypes(); track bt.id) {
-                <option [value]="bt.id">{{ bt.name }}</option>
+              @if (form.ownerId && selectedOwner()) {
+                <div class="owner-selected">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  {{ selectedOwner()!.name }} — {{ selectedOwner()!.email }}
+                </div>
               }
-            </select>
-          </div>
-
-          <div class="field-group">
-            <div class="field">
-              <label class="field-label">Fuso horário</label>
-              <select class="field-input" [(ngModel)]="form.timezone">
-                <option value="America/Sao_Paulo">America/Sao_Paulo</option>
-                <option value="America/Manaus">America/Manaus</option>
-                <option value="America/Belem">America/Belem</option>
-                <option value="America/Fortaleza">America/Fortaleza</option>
-                <option value="America/Noronha">America/Noronha</option>
-              </select>
             </div>
-            <div class="field">
-              <label class="field-label">Dias de trial</label>
-              <input class="field-input" type="text" inputmode="numeric" [(ngModel)]="form.trialDays" (keydown)="onlyDigits($event)" />
+            <div class="form-grid-2">
+              <div class="field">
+                <label class="field-label">Plano <span class="req">*</span></label>
+                <select class="field-input field-select" [(ngModel)]="form.planId">
+                  <option value="">Selecione...</option>
+                  @for (p of plans(); track p.id) {
+                    @if (p.status === 'Active') {
+                      <option [value]="p.id">{{ p.name }}</option>
+                    }
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">Tipo de negócio <span class="req">*</span></label>
+                <select class="field-input field-select" [(ngModel)]="form.businessTypeId">
+                  <option value="">Selecione...</option>
+                  @for (bt of businessTypes(); track bt.id) {
+                    <option [value]="bt.id">{{ bt.name }}</option>
+                  }
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -287,7 +310,10 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
         <div class="drawer-footer">
           <button class="btn btn-ghost" (click)="closeDrawer()">Cancelar</button>
           <button class="btn btn-primary" (click)="submit()" [disabled]="saving()">
-            {{ saving() ? 'Criando...' : 'Criar Estabelecimento' }}
+            @if (saving()) {
+              <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              Criando...
+            } @else { Criar Estabelecimento }
           </button>
         </div>
       </aside>
@@ -474,42 +500,36 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
       from { transform: translateX(100%); }
       to   { transform: translateX(0); }
     }
-    .drawer-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 24px; border-bottom: 1px solid #f0f0f3; flex-shrink: 0;
-    }
-    .drawer-title { font-size: 16px; font-weight: 700; color: #111; }
-    .btn-close {
-      width: 32px; height: 32px; border-radius: 8px;
-      border: none; background: #f4f4f5; color: #666;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; &:hover { background: #ebebef; }
-    }
-    .drawer-body {
-      flex: 1; overflow-y: auto; padding: 24px;
-      display: flex; flex-direction: column; gap: 16px;
-    }
-    .drawer-footer {
-      padding: 16px 24px; border-top: 1px solid #f0f0f3;
-      display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0;
-    }
+    .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #f0f0f3; flex-shrink: 0; background: #fff; }
+    .drawer-header-left { display: flex; align-items: center; gap: 12px; }
+    .drawer-icon { width: 36px; height: 36px; border-radius: 10px; background: color-mix(in srgb, var(--color-brand) 10%, transparent); color: var(--color-brand); display: flex; align-items: center; justify-content: center; }
+    .drawer-title { font-size: 15px; font-weight: 700; color: #111; }
+    .drawer-subtitle { font-size: 11px; color: #aaa; margin-top: 1px; }
+    .btn-close { width: 30px; height: 30px; border-radius: 7px; border: 1px solid #e8e8ec; background: #fff; color: #888; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .12s; &:hover { background: #f4f4f5; color: #333; } }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+    .drawer-footer { padding: 14px 20px; border-top: 1px solid #f0f0f3; display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0; background: #fafafa; }
+
+    /* Form sections */
+    .form-section { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: #fafafa; border: 1px solid #f0f0f3; border-radius: 10px; }
+    .form-section-header { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #999; svg { color: var(--color-brand); } }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
     /* Form fields */
-    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
     .field-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .field-label {
-      font-size: 12px; font-weight: 600; color: #555;
-      display: flex; align-items: center; justify-content: space-between;
-    }
+    .field-label { font-size: 11px; font-weight: 600; color: #666; }
+    .req { color: var(--color-brand); }
     .field-hint { font-weight: 400; color: #aaa; font-size: 11px; }
     .field-input {
-      padding: 9px 12px; border: 1px solid #e8e8ec;
-      border-radius: 8px; font-size: 13px; color: #111;
-      outline: none; transition: border-color .15s; background: #fff;
-      &:focus { border-color: var(--color-brand); }
+      width: 100%; padding: 8px 10px; border: 1px solid #e8e8ec; border-radius: 7px;
+      font-size: 13px; color: #111; outline: none; transition: border-color .15s, box-shadow .15s; background: #fff; box-sizing: border-box;
+      &:focus { border-color: var(--color-brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 12%, transparent); }
       &::placeholder { color: #ccc; }
     }
+    .field-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 26px; cursor: pointer; }
     .field-error { font-size: 11px; color: #dc2626; }
+    @keyframes spinAnim { to { transform: rotate(360deg); } }
+    .spin-icon { animation: spinAnim .8s linear infinite; transform-origin: center; }
 
     /* Responsive */
     @media (max-width: 768px) {

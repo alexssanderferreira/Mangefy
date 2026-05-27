@@ -18,10 +18,23 @@ public sealed class PlatformSupplierConfiguration : IEntityTypeConfiguration<Pla
         builder.Property(x => x.Description).HasMaxLength(1000);
         builder.Property(x => x.IsActive).IsRequired();
 
+        builder.Property(x => x.BusinessHours).HasMaxLength(300);
+
         builder.OwnsOne(x => x.Email, e =>
             e.Property(x => x.Value).HasColumnName("Email").HasMaxLength(200));
 
         builder.OwnsOne(x => x.Phone, p =>
             p.Property(x => x.Value).HasColumnName("Phone").HasMaxLength(30));
+
+        builder.OwnsOne(x => x.Address, a =>
+        {
+            a.Property(x => x.Cep).HasColumnName("AddressCep").HasMaxLength(10);
+            a.Property(x => x.Logradouro).HasColumnName("AddressLogradouro").HasMaxLength(200);
+            a.Property(x => x.Numero).HasColumnName("AddressNumero").HasMaxLength(20);
+            a.Property(x => x.Complemento).HasColumnName("AddressComplemento").HasMaxLength(100);
+            a.Property(x => x.Bairro).HasColumnName("AddressBairro").HasMaxLength(100);
+            a.Property(x => x.Cidade).HasColumnName("AddressCidade").HasMaxLength(100);
+            a.Property(x => x.Uf).HasColumnName("AddressUf").HasMaxLength(2);
+        });
     }
 }

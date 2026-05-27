@@ -891,6 +891,10 @@ namespace Mangefy.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("BusinessHours")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
                     b.Property<string>("Cnpj")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
@@ -2605,6 +2609,10 @@ namespace Mangefy.Infrastructure.Migrations
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("uuid");
 
+                            b1.Property<decimal>("Amount")
+                                .HasColumnType("decimal(10,2)")
+                                .HasColumnName("Amount");
+
                             b1.Property<DateTime>("CreatedAt")
                                 .HasColumnType("timestamp with time zone");
 
@@ -2650,32 +2658,6 @@ namespace Mangefy.Infrastructure.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("SubscriptionId");
-
-                            b1.OwnsOne("Mangefy.Domain.Common.ValueObjects.Money", "Amount", b2 =>
-                                {
-                                    b2.Property<Guid>("InvoiceId")
-                                        .HasColumnType("uuid");
-
-                                    b2.Property<decimal>("Amount")
-                                        .HasColumnType("decimal(10,2)")
-                                        .HasColumnName("Amount");
-
-                                    b2.Property<string>("Currency")
-                                        .IsRequired()
-                                        .HasMaxLength(3)
-                                        .HasColumnType("character varying(3)")
-                                        .HasColumnName("Currency");
-
-                                    b2.HasKey("InvoiceId");
-
-                                    b2.ToTable("Invoices");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("InvoiceId");
-                                });
-
-                            b1.Navigation("Amount")
-                                .IsRequired();
                         });
 
                     b.Navigation("Invoices");
@@ -2683,6 +2665,60 @@ namespace Mangefy.Infrastructure.Migrations
 
             modelBuilder.Entity("Mangefy.Domain.Platform.Suppliers.PlatformSupplier", b =>
                 {
+                    b.OwnsOne("Mangefy.Domain.Common.ValueObjects.Address", "Address", b1 =>
+                        {
+                            b1.Property<Guid>("PlatformSupplierId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Bairro")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("AddressBairro");
+
+                            b1.Property<string>("Cep")
+                                .IsRequired()
+                                .HasMaxLength(10)
+                                .HasColumnType("character varying(10)")
+                                .HasColumnName("AddressCep");
+
+                            b1.Property<string>("Cidade")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("AddressCidade");
+
+                            b1.Property<string>("Complemento")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("AddressComplemento");
+
+                            b1.Property<string>("Logradouro")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("AddressLogradouro");
+
+                            b1.Property<string>("Numero")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("AddressNumero");
+
+                            b1.Property<string>("Uf")
+                                .IsRequired()
+                                .HasMaxLength(2)
+                                .HasColumnType("character varying(2)")
+                                .HasColumnName("AddressUf");
+
+                            b1.HasKey("PlatformSupplierId");
+
+                            b1.ToTable("PlatformSuppliers");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlatformSupplierId");
+                        });
+
                     b.OwnsOne("Mangefy.Domain.Common.ValueObjects.Email", "Email", b1 =>
                         {
                             b1.Property<Guid>("PlatformSupplierId")
@@ -2720,6 +2756,8 @@ namespace Mangefy.Infrastructure.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("PlatformSupplierId");
                         });
+
+                    b.Navigation("Address");
 
                     b.Navigation("Email");
 

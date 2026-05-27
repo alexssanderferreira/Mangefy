@@ -19,6 +19,14 @@ export interface PlatformSupplierDto {
   phone: string | null;
   description: string | null;
   isActive: boolean;
+  addressCep: string | null;
+  addressLogradouro: string | null;
+  addressNumero: string | null;
+  addressComplemento: string | null;
+  addressBairro: string | null;
+  addressCidade: string | null;
+  addressUf: string | null;
+  businessHours: string | null;
 }
 
 export interface CreateSupplierRequest {
@@ -29,6 +37,14 @@ export interface CreateSupplierRequest {
   email?: string | null;
   phone?: string | null;
   description?: string | null;
+  cep?: string | null;
+  logradouro?: string | null;
+  numero?: string | null;
+  bairro?: string | null;
+  cidade?: string | null;
+  uf?: string | null;
+  complemento?: string | null;
+  businessHours?: string | null;
 }
 
 export interface CreateCategoryRequest {
@@ -67,6 +83,10 @@ export class SupplierService {
   }
 
   // ─── Suppliers ─────────────────────────────────────────────────────────────
+  getSupplier(id: string) {
+    return this.http.get<PlatformSupplierDto>(`${this.base}/platform-suppliers/${id}`);
+  }
+
   getSuppliers(categoryId?: string) {
     const params = categoryId ? `?categoryId=${categoryId}` : '';
     return this.http.get<PlatformSupplierDto[]>(`${this.base}/platform-suppliers${params}`);

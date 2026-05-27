@@ -33,7 +33,11 @@ public sealed class OwnersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateOwnerRequest request, CancellationToken ct)
     {
-        var result = await _sender.Send(new CreateOwnerCommand(request.Name, request.Email), ct);
+        var result = await _sender.Send(new CreateOwnerCommand(
+            request.Name, request.Email,
+            request.Phone, request.DocumentType, request.DocumentNumber,
+            request.Cep, request.Logradouro, request.Numero,
+            request.Complemento, request.Bairro, request.Cidade, request.Uf), ct);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
@@ -68,7 +72,20 @@ public sealed class OwnersController : ControllerBase
         => Ok(await _sender.Send(new ResendActivationCommand(id), ct));
 }
 
-public sealed record CreateOwnerRequest(string Name, string Email);
+public sealed record CreateOwnerRequest(
+    string Name,
+    string Email,
+    string? Phone,
+    string? DocumentType,
+    string? DocumentNumber,
+    string? Cep,
+    string? Logradouro,
+    string? Numero,
+    string? Complemento,
+    string? Bairro,
+    string? Cidade,
+    string? Uf
+);
 
 public sealed record UpdateOwnerRequest(
     string Name,

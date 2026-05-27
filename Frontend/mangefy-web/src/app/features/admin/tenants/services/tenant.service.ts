@@ -80,7 +80,7 @@ export class TenantService {
   suspend(id: string)   { return this.http.patch(`${this.base}/${id}/suspend`, null); }
   reactivate(id: string){ return this.http.patch(`${this.base}/${id}/reactivate`, null); }
   cancel(id: string)    { return this.http.patch(`${this.base}/${id}/cancel`, null); }
-  getEmployees(id: string) { return this.http.get<EmployeeDto[]>(`${this.base}/${id}/employees`); }
+  getEmployees(id: string) { return this.http.get<EmployeeDto[]>(`${environment.apiUrl}/admin/tenants/${id}/employees`); }
 
   computeMetrics(tenants: TenantDto[]): DashboardMetrics {
     const now = new Date();

@@ -18,6 +18,8 @@ public sealed class PlatformSupplier : AggregateRoot
     public PhoneNumber? Phone { get; private set; }
     public string? Description { get; private set; }
     public bool IsActive { get; private set; }
+    public Address? Address { get; private set; }
+    public string? BusinessHours { get; private set; }
 
     private PlatformSupplier() { }
 
@@ -28,7 +30,15 @@ public sealed class PlatformSupplier : AggregateRoot
         string? website = null,
         string? email = null,
         string? phone = null,
-        string? description = null)
+        string? description = null,
+        string? cep = null,
+        string? logradouro = null,
+        string? numero = null,
+        string? bairro = null,
+        string? cidade = null,
+        string? uf = null,
+        string? complemento = null,
+        string? businessHours = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException("Nome do fornecedor não pode ser vazio.");
@@ -36,7 +46,7 @@ public sealed class PlatformSupplier : AggregateRoot
         if (supplierCategoryId == Guid.Empty)
             throw new DomainException("Categoria do fornecedor inválida.");
 
-        return new PlatformSupplier
+        var supplier = new PlatformSupplier
         {
             Name = name.Trim(),
             Cnpj = cnpj?.Trim(),
@@ -45,8 +55,14 @@ public sealed class PlatformSupplier : AggregateRoot
             Email = email is not null ? Email.Create(email) : null,
             Phone = phone is not null ? PhoneNumber.Create(phone) : null,
             Description = description?.Trim(),
+            BusinessHours = businessHours?.Trim(),
             IsActive = true
         };
+
+        if (!string.IsNullOrWhiteSpace(cep) || !string.IsNullOrWhiteSpace(logradouro))
+            supplier.Address = Address.Create(cep!, logradouro!, numero!, bairro!, cidade!, uf!, complemento);
+
+        return supplier;
     }
 
     public void Update(
@@ -56,7 +72,15 @@ public sealed class PlatformSupplier : AggregateRoot
         string? website,
         string? email,
         string? phone,
-        string? description)
+        string? description,
+        string? cep,
+        string? logradouro,
+        string? numero,
+        string? bairro,
+        string? cidade,
+        string? uf,
+        string? complemento,
+        string? businessHours)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException("Nome do fornecedor não pode ser vazio.");
@@ -71,6 +95,12 @@ public sealed class PlatformSupplier : AggregateRoot
         Email = email is not null ? Email.Create(email) : null;
         Phone = phone is not null ? PhoneNumber.Create(phone) : null;
         Description = description?.Trim();
+        BusinessHours = businessHours?.Trim();
+
+        Address = (!string.IsNullOrWhiteSpace(cep) || !string.IsNullOrWhiteSpace(logradouro))
+            ? Address.Create(cep!, logradouro!, numero!, bairro!, cidade!, uf!, complemento)
+            : null;
+
         SetUpdatedAt();
     }
 

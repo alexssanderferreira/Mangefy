@@ -53,53 +53,47 @@ function emptyForm(): EditForm {
         <div class="empty-state">Cliente não encontrado.</div>
       } @else {
 
-        <!-- Hero / Header -->
-        <div class="hero">
-          <div class="hero-left">
-            <div class="hero-avatar">{{ owner()!.name.charAt(0).toUpperCase() }}</div>
-            <div class="hero-meta">
-              <h1 class="hero-name">{{ owner()!.name }}</h1>
-              <div class="hero-sub">
+        <!-- Header -->
+        <div class="detail-header">
+          <div class="detail-meta">
+            <div class="detail-avatar">{{ owner()!.name.charAt(0).toUpperCase() }}</div>
+            <div>
+              <div class="detail-name-row">
+                <h1 class="detail-name">{{ owner()!.name }}</h1>
+                <span class="badge badge-{{ owner()!.status }}">{{ statusLabel(owner()!.status) }}</span>
+              </div>
+              <div class="detail-sub">
                 <span>{{ owner()!.email }}</span>
                 @if (owner()!.phone) { <span class="dot">·</span> <span>{{ formatPhone(owner()!.phone!) }}</span> }
-                @if (owner()!.documentNumber) {
-                  <span class="dot">·</span>
-                  <span>{{ owner()!.documentType }}: {{ formatDoc(owner()!.documentNumber!, owner()!.documentType!) }}</span>
-                }
               </div>
             </div>
           </div>
-          <div class="hero-right">
-            <span class="badge badge-{{ owner()!.status }}">{{ statusLabel(owner()!.status) }}</span>
+          <div class="header-actions">
+            <button class="btn btn-primary" (click)="openCreateTenant()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Novo Estabelecimento
+            </button>
+            <button class="btn btn-ghost" (click)="openEdit()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Editar
+            </button>
+            @if (owner()!.status === 'PendingActivation') {
+              <button class="btn btn-ghost" (click)="doResend()" [disabled]="acting()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                {{ acting() === 'resend' ? 'Enviando…' : 'Reenviar ativação' }}
+              </button>
+            }
+            @if (owner()!.status === 'Inactive') {
+              <button class="btn btn-success" (click)="doAction('activate')" [disabled]="acting()">
+                {{ acting() === 'activate' ? '…' : 'Ativar cliente' }}
+              </button>
+            }
+            @if (owner()!.status === 'Active') {
+              <button class="btn btn-warn" (click)="doAction('deactivate')" [disabled]="acting()">
+                {{ acting() === 'deactivate' ? '…' : 'Desativar cliente' }}
+              </button>
+            }
           </div>
-        </div>
-
-        <!-- Action bar -->
-        <div class="action-bar">
-          <button class="btn btn-primary" (click)="openCreateTenant()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Novo Estabelecimento
-          </button>
-          <button class="btn btn-ghost" (click)="openEdit()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Editar
-          </button>
-          @if (owner()!.status === 'PendingActivation') {
-            <button class="btn btn-ghost" (click)="doResend()" [disabled]="acting()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              {{ acting() === 'resend' ? 'Enviando…' : 'Reenviar ativação' }}
-            </button>
-          }
-          @if (owner()!.status === 'Inactive') {
-            <button class="btn btn-success" (click)="doAction('activate')" [disabled]="acting()">
-              {{ acting() === 'activate' ? '…' : 'Ativar cliente' }}
-            </button>
-          }
-          @if (owner()!.status === 'Active') {
-            <button class="btn btn-warn" (click)="doAction('deactivate')" [disabled]="acting()">
-              {{ acting() === 'deactivate' ? '…' : 'Desativar cliente' }}
-            </button>
-          }
         </div>
 
         <!-- Banner de link de ativação após resend -->
@@ -390,34 +384,34 @@ function emptyForm(): EditForm {
     @keyframes spin { to { transform: rotate(360deg); } }
     .empty-state { text-align: center; padding: 80px; color: #aaa; }
 
-    /* Hero */
-    .hero {
-      display: flex; justify-content: space-between; align-items: center; gap: 16px;
-      background: linear-gradient(135deg, #fff, #fafafa);
-      border: 1px solid #e8e8ec; border-radius: 14px;
-      padding: 20px 22px; margin-bottom: 14px;
+    /* Header */
+    .detail-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
     }
-    .hero-left { display: flex; align-items: center; gap: 16px; }
-    .hero-avatar {
-      width: 56px; height: 56px; border-radius: 16px;
+    .detail-meta { display: flex; align-items: center; gap: 14px; }
+    .detail-avatar {
+      width: 52px; height: 52px; border-radius: 14px;
       background: var(--color-brand); color: #fff;
       display: flex; align-items: center; justify-content: center;
       font-size: 22px; font-weight: 800; flex-shrink: 0;
     }
-    .hero-name { font-size: 22px; font-weight: 700; color: #111; line-height: 1.2; }
-    .hero-sub { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 12px; color: #777; margin-top: 4px; }
+    .detail-name-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .detail-name { font-size: 22px; font-weight: 700; color: #111; line-height: 1.2; }
+    .detail-sub { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 12px; color: #888; margin-top: 4px; }
     .dot { color: #ccc; }
-
-    /* Action bar */
-    .action-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+    .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
     /* Métricas */
-    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 28px; }
-    .metric-card { background: #fff; border: 1px solid #e8e8ec; border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
-    .metric-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #aaa; }
-    .metric-value { font-size: 24px; font-weight: 800; color: #111; line-height: 1; }
-    .metric-value-small { display: flex; flex-wrap: wrap; gap: 6px; }
-    .metric-sub { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 28px; }
+    .metric-card {
+      background: #fff; border: 1px solid #e8e8ec; border-radius: 12px; padding: 18px 20px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .metric-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #aaa; }
+    .metric-value { font-size: 26px; font-weight: 800; color: #111; line-height: 1; }
+    .metric-value-small { display: flex; flex-wrap: wrap; gap: 6px; min-height: 26px; align-items: center; }
+    .metric-sub { display: flex; gap: 6px; flex-wrap: wrap; }
     .muted { color: #aaa; font-size: 12px; }
 
     /* Chips */
@@ -428,20 +422,27 @@ function emptyForm(): EditForm {
     .chip-dark   { background: #f0f0f3; color: #333; }
 
     /* Section */
-    .section { margin-bottom: 24px; }
-    .section-title { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-    .section-count { background: #f0f0f3; color: #555; font-size: 11px; padding: 2px 8px; border-radius: 99px; }
+    .section { margin-bottom: 20px; }
+    .section-title { font-size: 13px; font-weight: 700; color: #555; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .section-count { background: #f0f0f3; color: #555; font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 700; }
 
-    /* DL */
-    .dl-grid { background: #fff; border: 1px solid #e8e8ec; border-radius: 12px; padding: 14px 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px 20px; }
-    .dl-grid dt { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #bbb; margin-bottom: 4px; }
-    .dl-grid dd { font-size: 13px; color: #111; margin: 0; }
+    /* DL card */
+    .dl-grid {
+      background: #fff; border: 1px solid #e8e8ec; border-radius: 14px;
+      padding: 20px; display: grid; grid-template-columns: auto 1fr; gap: 10px 24px; align-items: baseline;
+    }
+    .dl-grid > div { display: contents; }
+    .dl-grid dt { font-size: 12px; font-weight: 600; color: #aaa; white-space: nowrap; }
+    .dl-grid dd { font-size: 13px; color: #333; margin: 0; }
 
     /* Endereço */
-    .address-box { background: #fff; border: 1px solid #e8e8ec; border-radius: 12px; padding: 14px 18px; font-size: 13px; color: #333; line-height: 1.7; }
+    .address-box {
+      background: #fff; border: 1px solid #e8e8ec; border-radius: 14px;
+      padding: 20px; font-size: 13px; color: #333; line-height: 1.7;
+    }
 
     /* Notas */
-    .notes-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 14px 18px; font-size: 13px; color: #4a3c0a; white-space: pre-wrap; line-height: 1.6; }
+    .notes-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 14px; padding: 20px; font-size: 13px; color: #4a3c0a; white-space: pre-wrap; line-height: 1.6; }
 
     /* Tabela */
     .table-wrap { background: #fff; border: 1px solid #e8e8ec; border-radius: 12px; overflow: hidden; }

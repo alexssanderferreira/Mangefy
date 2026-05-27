@@ -67,6 +67,16 @@ export interface ListOwnersResult {
 export interface CreateOwnerRequest {
   name: string;
   email: string;
+  phone?: string | null;
+  documentType?: 'CPF' | 'CNPJ' | null;
+  documentNumber?: string | null;
+  cep?: string | null;
+  logradouro?: string | null;
+  numero?: string | null;
+  complemento?: string | null;
+  bairro?: string | null;
+  cidade?: string | null;
+  uf?: string | null;
 }
 
 export interface CreateOwnerResponse {

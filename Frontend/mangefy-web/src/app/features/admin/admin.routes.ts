@@ -43,6 +43,22 @@ export const ADMIN_ROUTES: Routes = [
         path: 'suppliers',
         loadComponent: () => import('./suppliers/suppliers.component').then(m => m.SuppliersComponent),
       },
+      {
+        path: 'suppliers/:id',
+        loadComponent: () => import('./suppliers/supplier-detail.component').then(m => m.SupplierDetailComponent),
+      },
+      {
+        path: 'subscriptions',
+        loadComponent: () => import('./subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent),
+      },
+      {
+        path: 'overdue',
+        loadComponent: () => import('./subscriptions/overdue.component').then(m => m.OverdueComponent),
+      },
+      {
+        path: 'feature-matrix',
+        loadComponent: () => import('./feature-matrix/feature-matrix.component').then(m => m.FeatureMatrixComponent),
+      },
     ],
   },
 ];

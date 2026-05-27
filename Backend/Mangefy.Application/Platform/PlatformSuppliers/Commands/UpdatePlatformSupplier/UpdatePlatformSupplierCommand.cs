@@ -10,4 +10,12 @@ public sealed record UpdatePlatformSupplierCommand(
     string? Website,
     string? Email,
     string? Phone,
-    string? Description) : IRequest;
+    string? Description,
+    string? Cep,
+    string? Logradouro,
+    string? Numero,
+    string? Bairro,
+    string? Cidade,
+    string? Uf,
+    string? Complemento,
+    string? BusinessHours) : IRequest;

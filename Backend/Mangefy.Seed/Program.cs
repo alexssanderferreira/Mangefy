@@ -236,7 +236,49 @@ foreach (var t in tenants)
     }
 }
 
-// ── 7. Suspender ─────────────────────────────────────────────────────────────
+// ── 7. Assinaturas ───────────────────────────────────────────────────────────
+Console.WriteLine("Criando assinaturas...");
+var today    = DateOnly.FromDateTime(DateTime.Today);
+var nextMonth = today.AddMonths(1);
+var planPrices = new[] { 99m, 199m, 399m };
+
+foreach (var (tenantId, slug, suspend) in createdTenants)
+{
+    var tIdx = Array.FindIndex(tenants, t => t.slug == slug);
+    var pIdx = tIdx >= 0 ? Math.Min(tenants[tIdx].planIdx, planPrices.Length - 1) : 0;
+    var price = planPrices[pIdx];
+    var planId = planIds[pIdx];
+
+    Console.Write($"  → {slug}... ");
+    var res = await http.PostAsJsonAsync($"{BASE}/admin/subscriptions/seed", new
+    {
+        tenantId,
+        planId,
+        startDate   = today.ToString("yyyy-MM-dd"),
+        nextDueDate = nextMonth.ToString("yyyy-MM-dd")
+    });
+
+    if (res.IsSuccessStatusCode)
+    {
+        var data = await res.Content.ReadFromJsonAsync<JsonElement>();
+        var subId = data.GetProperty("id").GetGuid();
+
+        // Gerar fatura do mês atual
+        var invRes = await http.PostAsJsonAsync($"{BASE}/admin/subscriptions/{subId}/invoices", new
+        {
+            amount  = price,
+            dueDate = nextMonth.ToString("yyyy-MM-dd")
+        });
+        Console.WriteLine(invRes.IsSuccessStatusCode ? $"OK ({subId})" : $"sub criada mas fatura falhou ({invRes.StatusCode})");
+    }
+    else
+    {
+        var err = await res.Content.ReadAsStringAsync();
+        Console.WriteLine($"falhou ({res.StatusCode}): {err[..Math.Min(120, err.Length)]}");
+    }
+}
+
+// ── 8. Suspender ─────────────────────────────────────────────────────────────
 Console.WriteLine("Suspendendo tenants...");
 foreach (var (id, _, _) in createdTenants.Where(x => x.suspend))
 {

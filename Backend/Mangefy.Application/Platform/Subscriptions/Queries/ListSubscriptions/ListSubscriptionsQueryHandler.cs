@@ -1,0 +1,63 @@
+using Mangefy.Domain.Platform.Subscriptions;
+using Mangefy.Domain.Platform.Subscriptions.Repositories;
+using Mangefy.Domain.Plans.Repositories;
+using Mangefy.Domain.Tenants.Repositories;
+using MediatR;
+
+namespace Mangefy.Application.Platform.Subscriptions.Queries.ListSubscriptions;
+
+public sealed class ListSubscriptionsQueryHandler : IRequestHandler<ListSubscriptionsQuery, IReadOnlyList<SubscriptionDto>>
+{
+    private readonly ISubscriptionRepository _subscriptions;
+    private readonly ITenantRepository _tenants;
+    private readonly IPlanRepository _plans;
+
+    public ListSubscriptionsQueryHandler(
+        ISubscriptionRepository subscriptions,
+        ITenantRepository tenants,
+        IPlanRepository plans)
+    {
+        _subscriptions = subscriptions;
+        _tenants = tenants;
+        _plans = plans;
+    }
+
+    public async Task<IReadOnlyList<SubscriptionDto>> Handle(ListSubscriptionsQuery request, CancellationToken cancellationToken)
+    {
+        var subscriptions = await _subscriptions.GetAllAsync(cancellationToken);
+        var tenants = await _tenants.GetAllAsync(cancellationToken);
+        var plans = await _plans.GetAllAsync(cancellationToken);
+
+        var tenantMap = tenants.ToDictionary(t => t.Id);
+        var planMap = plans.ToDictionary(p => p.Id);
+
+        return subscriptions.Select(s =>
+        {
+            var tenant = tenantMap.GetValueOrDefault(s.TenantId);
+            var plan = planMap.GetValueOrDefault(s.PlanId);
+            var latest = s.GetLatestInvoice();
+            return new SubscriptionDto(
+                s.Id,
+                s.TenantId,
+                tenant?.Name ?? "–",
+                tenant?.Slug ?? "–",
+                s.PlanId,
+                plan?.Name ?? "–",
+                s.StartDate,
+                s.NextDueDate,
+                latest?.Status.ToString(),
+                latest?.Amount.Amount,
+                latest?.DueDate,
+                s.Invoices.Count(i => i.Status == Domain.Platform.Subscriptions.InvoiceStatus.Overdue),
+                s.Invoices.Select(i => new InvoiceDto(
+                    i.Id,
+                    i.Amount.Amount,
+                    i.Amount.Currency,
+                    i.DueDate,
+                    i.PaidAt,
+                    i.Status.ToString(),
+                    i.PaymentReference,
+                    i.Notes)).ToList());
+        }).ToList();
+    }
+}

@@ -75,28 +75,45 @@ import { ToastService } from '../../../core/toast/toast.service';
       <div class="drawer-overlay" (click)="closeDrawer()"></div>
       <aside class="drawer">
         <div class="drawer-header">
-          <h2 class="drawer-title">Novo Tipo de Negócio</h2>
+          <div class="drawer-header-left">
+            <div class="drawer-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            </div>
+            <div>
+              <h2 class="drawer-title">Novo Tipo de Negócio</h2>
+              <p class="drawer-subtitle">Define o modelo de operação do tenant</p>
+            </div>
+          </div>
           <button class="drawer-close" (click)="closeDrawer()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
 
         <div class="drawer-body">
-          <div class="field">
-            <label class="field-label">Nome <span class="required">*</span></label>
-            <input class="field-input" [(ngModel)]="form.name" placeholder="ex: Restaurante, Bar, Padaria" autofocus>
-          </div>
-          <div class="field">
-            <label class="field-label">Descrição</label>
-            <textarea class="field-input field-textarea" [(ngModel)]="form.description" placeholder="Descrição opcional..." rows="3"></textarea>
+          <div class="form-section">
+            <div class="form-section-header">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              Dados
+            </div>
+            <div class="field">
+              <label class="field-label">Nome <span class="required">*</span></label>
+              <input class="field-input" [(ngModel)]="form.name" placeholder="ex: Restaurante, Bar, Padaria" autofocus>
+            </div>
+            <div class="field">
+              <label class="field-label">Descrição</label>
+              <textarea class="field-input field-textarea" [(ngModel)]="form.description" placeholder="Descreva o tipo de negócio..." rows="3"></textarea>
+            </div>
           </div>
         </div>
 
         <div class="drawer-footer">
-          <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
-            {{ saving() ? 'Salvando...' : 'Criar Tipo' }}
-          </button>
           <button class="btn btn-ghost" (click)="closeDrawer()">Cancelar</button>
+          <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+            @if (saving()) {
+              <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              Salvando...
+            } @else { Criar Tipo }
+          </button>
         </div>
       </aside>
     }
@@ -199,30 +216,31 @@ import { ToastService } from '../../../core/toast/toast.service';
     @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
-    .drawer-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 24px; border-bottom: 1px solid #f0f0f3;
-    }
-    .drawer-title { font-size: 16px; font-weight: 700; color: #111; }
-    .drawer-close {
-      display: flex; align-items: center; justify-content: center;
-      width: 32px; height: 32px; border: none; background: #f4f4f5;
-      border-radius: 8px; cursor: pointer; color: #666;
-      transition: all .15s; &:hover { background: #ebebef; color: #111; }
-    }
-    .drawer-body   { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
-    .drawer-footer { padding: 16px 24px; border-top: 1px solid #f0f0f3; display: flex; gap: 8px; }
+    .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #f0f0f3; }
+    .drawer-header-left { display: flex; align-items: center; gap: 12px; }
+    .drawer-icon { width: 36px; height: 36px; border-radius: 10px; background: color-mix(in srgb, var(--color-brand) 10%, transparent); color: var(--color-brand); display: flex; align-items: center; justify-content: center; }
+    .drawer-title { font-size: 15px; font-weight: 700; color: #111; }
+    .drawer-subtitle { font-size: 11px; color: #aaa; margin-top: 1px; }
+    .drawer-close { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid #e8e8ec; background: #fff; border-radius: 7px; cursor: pointer; color: #888; transition: all .15s; &:hover { background: #f4f4f5; color: #333; } }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+    .drawer-footer { padding: 14px 20px; border-top: 1px solid #f0f0f3; display: flex; gap: 8px; justify-content: flex-end; background: #fafafa; }
 
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field-label { font-size: 12px; font-weight: 600; color: #555; }
+    .form-section { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: #fafafa; border: 1px solid #f0f0f3; border-radius: 10px; }
+    .form-section-header { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #999; svg { color: var(--color-brand); } }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field-label { font-size: 11px; font-weight: 600; color: #666; }
     .required { color: var(--color-brand); }
     .field-input {
-      padding: 9px 12px; border: 1px solid #e8e8ec; border-radius: 8px;
-      font-size: 13px; color: #111; outline: none; transition: border-color .15s;
+      padding: 8px 10px; border: 1px solid #e8e8ec; border-radius: 7px;
+      font-size: 13px; color: #111; outline: none; transition: border-color .15s, box-shadow .15s;
       background: #fff; width: 100%; box-sizing: border-box;
-      &:focus { border-color: var(--color-brand); }
+      &:focus { border-color: var(--color-brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 12%, transparent); }
+      &::placeholder { color: #ccc; }
     }
     .field-textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+    @keyframes spinAnim { to { transform: rotate(360deg); } }
+    .spin-icon { animation: spinAnim .8s linear infinite; transform-origin: center; }
 
     @media (max-width: 768px) {
       .page { padding: 14px; max-width: 100%; }

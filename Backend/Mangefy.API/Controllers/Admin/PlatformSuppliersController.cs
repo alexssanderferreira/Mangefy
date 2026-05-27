@@ -3,6 +3,7 @@ using Mangefy.Application.Platform.PlatformSuppliers.Commands.CreatePlatformSupp
 using Mangefy.Application.Platform.PlatformSuppliers.Commands.DeletePlatformSupplier;
 using Mangefy.Application.Platform.PlatformSuppliers.Commands.TogglePlatformSupplier;
 using Mangefy.Application.Platform.PlatformSuppliers.Commands.UpdatePlatformSupplier;
+using Mangefy.Application.Platform.PlatformSuppliers.Queries.GetPlatformSupplierById;
 using Mangefy.Application.Platform.PlatformSuppliers.Queries.GetPlatformSuppliers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -24,12 +25,18 @@ public sealed class PlatformSuppliersController : ControllerBase
     public async Task<IActionResult> GetAll([FromQuery] Guid? categoryId, CancellationToken ct)
         => Ok(await _sender.Send(new GetPlatformSuppliersQuery(categoryId), ct));
 
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+        => Ok(await _sender.Send(new GetPlatformSupplierByIdQuery(id), ct));
+
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreatePlatformSupplierRequest request, CancellationToken ct)
     {
         var id = await _sender.Send(new CreatePlatformSupplierCommand(
             request.Name, request.SupplierCategoryId,
-            request.Cnpj, request.Website, request.Email, request.Phone, request.Description), ct);
+            request.Cnpj, request.Website, request.Email, request.Phone, request.Description,
+            request.Cep, request.Logradouro, request.Numero, request.Bairro, request.Cidade, request.Uf, request.Complemento,
+            request.BusinessHours), ct);
         return Created($"/api/admin/platform-suppliers/{id}", new { Id = id });
     }
 
@@ -38,7 +45,9 @@ public sealed class PlatformSuppliersController : ControllerBase
     {
         await _sender.Send(new UpdatePlatformSupplierCommand(
             id, request.Name, request.SupplierCategoryId,
-            request.Cnpj, request.Website, request.Email, request.Phone, request.Description), ct);
+            request.Cnpj, request.Website, request.Email, request.Phone, request.Description,
+            request.Cep, request.Logradouro, request.Numero, request.Bairro, request.Cidade, request.Uf, request.Complemento,
+            request.BusinessHours), ct);
         return NoContent();
     }
 
@@ -71,7 +80,15 @@ public sealed record CreatePlatformSupplierRequest(
     string? Website = null,
     string? Email = null,
     string? Phone = null,
-    string? Description = null);
+    string? Description = null,
+    string? Cep = null,
+    string? Logradouro = null,
+    string? Numero = null,
+    string? Bairro = null,
+    string? Cidade = null,
+    string? Uf = null,
+    string? Complemento = null,
+    string? BusinessHours = null);
 
 public sealed record UpdatePlatformSupplierRequest(
     string Name,
@@ -80,4 +97,12 @@ public sealed record UpdatePlatformSupplierRequest(
     string? Website,
     string? Email,
     string? Phone,
-    string? Description);
+    string? Description,
+    string? Cep,
+    string? Logradouro,
+    string? Numero,
+    string? Bairro,
+    string? Cidade,
+    string? Uf,
+    string? Complemento,
+    string? BusinessHours);
