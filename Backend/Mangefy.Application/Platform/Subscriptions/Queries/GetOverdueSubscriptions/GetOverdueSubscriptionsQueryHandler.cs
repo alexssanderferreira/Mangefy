@@ -31,12 +31,18 @@ public sealed class GetOverdueSubscriptionsQueryHandler : IRequestHandler<GetOve
 
         var tenantMap = tenants.ToDictionary(t => t.Id);
         var planMap = plans.ToDictionary(p => p.Id);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
         return subscriptions.Select(s =>
         {
+            // Marca em memória faturas Pending vencidas como Overdue para projeção correta do DTO.
+            // Não persiste — o job agendado é responsável pela persistência.
+            s.MarkOverdueInvoices(today);
+
             var tenant = tenantMap.GetValueOrDefault(s.TenantId);
             var plan = planMap.GetValueOrDefault(s.PlanId);
             var latest = s.GetLatestInvoice();
+            var overdueCount = s.Invoices.Count(i => i.Status == InvoiceStatus.Overdue);
             return new SubscriptionDto(
                 s.Id,
                 s.TenantId,
@@ -49,7 +55,7 @@ public sealed class GetOverdueSubscriptionsQueryHandler : IRequestHandler<GetOve
                 latest?.Status.ToString(),
                 latest?.Amount.Amount,
                 latest?.DueDate,
-                s.Invoices.Count(i => i.Status == InvoiceStatus.Overdue),
+                overdueCount,
                 s.Invoices.Select(i => new InvoiceDto(
                     i.Id,
                     i.Amount.Amount,
@@ -58,7 +64,8 @@ public sealed class GetOverdueSubscriptionsQueryHandler : IRequestHandler<GetOve
                     i.PaidAt,
                     i.Status.ToString(),
                     i.PaymentReference,
-                    i.Notes)).ToList());
+                    i.Notes)).ToList(),
+                "Inadimplente");
         }).ToList();
     }
 }

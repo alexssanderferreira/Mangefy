@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { SubscriptionService, SubscriptionDto, InvoiceDto } from './subscription.service';
 import { ToastService } from '../../../core/toast/toast.service';
 
@@ -13,7 +14,6 @@ type DrawerMode = 'invoice' | 'payment' | null;
   template: `
     <div class="page">
 
-      <!-- Header -->
       <div class="page-header">
         <div>
           <h1 class="page-title">Assinaturas</h1>
@@ -33,7 +33,6 @@ type DrawerMode = 'invoice' | 'payment' | null;
       }
 
       @if (!loading()) {
-        <!-- Filter bar -->
         <div class="filter-bar">
           <div class="search-wrap">
             <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -41,10 +40,10 @@ type DrawerMode = 'invoice' | 'payment' | null;
           </div>
           <select class="filter-select" [value]="filterStatus()" (change)="filterStatus.set($any($event.target).value)">
             <option value="">Todos os status</option>
-            <option value="Pending">Pendente</option>
-            <option value="Paid">Pago</option>
-            <option value="Overdue">Atrasado</option>
-            <option value="none">Sem faturas</option>
+            <option value="EmDia">Em dia</option>
+            <option value="AguardandoPagamento">Aguardando pagamento</option>
+            <option value="Inadimplente">Inadimplente</option>
+            <option value="SemFaturas">Sem faturas</option>
           </select>
         </div>
 
@@ -53,10 +52,10 @@ type DrawerMode = 'invoice' | 'payment' | null;
             <thead><tr>
               <th>Estabelecimento</th>
               <th>Plano</th>
-              <th>Próx. Vencimento</th>
-              <th>Último Valor</th>
               <th>Status</th>
-              <th>Inadimplências</th>
+              <th>Fatura em aberto</th>
+              <th>Próx. vencimento</th>
+              <th>Último pagamento</th>
               <th></th>
             </tr></thead>
             <tbody>
@@ -70,29 +69,35 @@ type DrawerMode = 'invoice' | 'payment' | null;
                     <div class="cell-sub">{{ s.tenantSlug }}</div>
                   </td>
                   <td>{{ s.planName }}</td>
-                  <td>{{ formatDate(s.nextDueDate) }}</td>
-                  <td>{{ s.latestInvoiceAmount != null ? ('R$ ' + s.latestInvoiceAmount.toFixed(2)) : '–' }}</td>
+                  <td><span [class]="'badge ' + statusClass(s.status)">{{ statusLabel(s.status) }}</span></td>
                   <td>
-                    @if (s.latestInvoiceStatus) {
-                      <span [class]="'badge ' + statusClass(s.latestInvoiceStatus)">{{ statusLabel(s.latestInvoiceStatus) }}</span>
+                    @if (openInvoice(s); as inv) {
+                      <span class="amount-pending">R$ {{ inv.amount.toFixed(2) }}</span>
+                      <span class="due-label">· venc. {{ formatDate(inv.dueDate) }}</span>
                     } @else {
-                      <span class="badge badge-neutral">Sem faturas</span>
+                      <span class="text-muted">–</span>
                     }
                   </td>
+                  <td>{{ formatDate(s.nextDueDate) }}</td>
                   <td>
-                    @if (s.overdueCount > 0) {
-                      <span class="badge badge-danger">{{ s.overdueCount }} em atraso</span>
+                    @if (lastPaid(s); as inv) {
+                      <span class="amount-paid">R$ {{ inv.amount.toFixed(2) }}</span>
+                      @if (inv.paidAt) {
+                        <span class="due-label">· {{ formatDate(inv.paidAt) }}</span>
+                      }
                     } @else {
                       <span class="text-muted">–</span>
                     }
                   </td>
                   <td>
                     <div class="row-actions" (click)="$event.stopPropagation()">
-                      <button class="btn-icon" title="Gerar fatura" (click)="openInvoice(s)">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                      </button>
-                      @if (pendingInvoice(s)) {
-                        <button class="btn-icon btn-icon-success" title="Confirmar pagamento" (click)="openPayment(s)">
+                      @if (!openInvoice(s)) {
+                        <button class="btn-icon" title="Gerar fatura" (click)="openInvoiceDrawer(s)">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </button>
+                      }
+                      @if (openInvoice(s)) {
+                        <button class="btn-icon btn-icon-success" title="Confirmar pagamento" (click)="openPaymentDrawer(s)">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                         </button>
                       }
@@ -107,7 +112,7 @@ type DrawerMode = 'invoice' | 'payment' | null;
 
     </div>
 
-    <!-- Drawer: Generate Invoice -->
+    <!-- Drawer: Gerar Fatura -->
     @if (drawer() === 'invoice' && selected()) {
       <div class="drawer-overlay" (click)="closeDrawer()">
         <div class="drawer" (click)="$event.stopPropagation()">
@@ -120,7 +125,7 @@ type DrawerMode = 'invoice' | 'payment' | null;
           <div class="drawer-body">
             <div class="info-card">
               <div class="info-card-name">{{ selected()!.tenantName }}</div>
-              <div class="info-card-sub">{{ selected()!.planName || 'Sem plano' }}</div>
+              <div class="info-card-sub">{{ selected()!.planName }} · próx. venc. {{ formatDate(selected()!.nextDueDate) }}</div>
             </div>
             <div class="form-group">
               <label class="form-label">Valor (R$)</label>
@@ -133,7 +138,7 @@ type DrawerMode = 'invoice' | 'payment' | null;
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label">Vencimento</label>
+              <label class="form-label">Data de vencimento</label>
               <input class="form-control" type="date" [(ngModel)]="invoiceDueDate" />
             </div>
           </div>
@@ -147,7 +152,7 @@ type DrawerMode = 'invoice' | 'payment' | null;
       </div>
     }
 
-    <!-- Drawer: Confirm Payment -->
+    <!-- Drawer: Confirmar Pagamento -->
     @if (drawer() === 'payment' && selected()) {
       <div class="drawer-overlay" (click)="closeDrawer()">
         <div class="drawer" (click)="$event.stopPropagation()">
@@ -158,17 +163,29 @@ type DrawerMode = 'invoice' | 'payment' | null;
             </button>
           </div>
           <div class="drawer-body">
-            <p class="drawer-subtitle">{{ selected()!.tenantName }} · Fatura de R$ {{ pendingInvoice(selected()!)?.amount?.toFixed(2) }}</p>
+            <div class="info-card">
+              <div class="info-card-name">{{ selected()!.tenantName }}</div>
+              <div class="info-card-sub">
+                Fatura: R$ {{ openInvoice(selected()!)?.amount?.toFixed(2) }}
+                · venc. {{ formatDate(openInvoice(selected()!)?.dueDate ?? '') }}
+              </div>
+            </div>
+            @if (selected()!.overdueCount > 0) {
+              <div class="alert-warn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Esta assinatura tem {{ selected()!.overdueCount }} fatura{{ selected()!.overdueCount !== 1 ? 's' : '' }} em atraso. O pagamento será aplicado à mais antiga.
+              </div>
+            }
             <div class="form-group">
-              <label class="form-label">Data do Pagamento</label>
+              <label class="form-label">Data do pagamento</label>
               <input class="form-control" type="date" [(ngModel)]="paymentPaidAt" />
             </div>
             <div class="form-group">
-              <label class="form-label">Próximo Vencimento</label>
+              <label class="form-label">Próximo vencimento</label>
               <input class="form-control" type="date" [(ngModel)]="paymentNextDueDate" />
             </div>
             <div class="form-group">
-              <label class="form-label">Referência de Pagamento</label>
+              <label class="form-label">Referência de pagamento</label>
               <input class="form-control" type="text" [(ngModel)]="paymentRef" placeholder="Número do boleto, código PIX..." />
             </div>
             <div class="form-group">
@@ -188,13 +205,7 @@ type DrawerMode = 'invoice' | 'payment' | null;
   `,
   styles: [`
     .page { padding: 28px 32px; max-width: 1200px; }
-
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 24px;
-    }
+    .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
     .page-title { font-size: 22px; font-weight: 700; color: var(--text-primary); margin: 0 0 4px; }
     .page-subtitle { font-size: 13px; color: var(--text-muted); margin: 0; }
 
@@ -204,27 +215,28 @@ type DrawerMode = 'invoice' | 'payment' | null;
       color: var(--color-danger); border-radius: 8px; padding: 10px 14px;
       font-size: 13px; margin-bottom: 16px;
     }
+    .alert-warn {
+      display: flex; align-items: flex-start; gap: 8px;
+      background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3);
+      color: #d97706; border-radius: 8px; padding: 10px 14px; font-size: 13px;
+    }
 
     .skel-rows { display: flex; flex-direction: column; gap: 8px; }
     .skel-row { height: 48px; background: var(--surface-bg); border-radius: 8px; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
 
-    .filter-bar {
-      display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
-    }
-    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .filter-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 320px; }
     .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
     .search-input {
       width: 100%; padding: 8px 12px 8px 32px;
       border: 1px solid var(--surface-border); border-radius: 8px;
-      background: var(--surface-bg); color: var(--text-primary);
-      font-size: 13px; outline: none;
+      background: var(--surface-bg); color: var(--text-primary); font-size: 13px; outline: none;
       &:focus { border-color: var(--color-brand); }
     }
     .filter-select {
       padding: 8px 12px; border: 1px solid var(--surface-border); border-radius: 8px;
-      background: var(--surface-bg); color: var(--text-primary); font-size: 13px; outline: none;
-      cursor: pointer;
+      background: var(--surface-bg); color: var(--text-primary); font-size: 13px; outline: none; cursor: pointer;
     }
 
     .table-wrap { border: 1px solid var(--surface-border); border-radius: 10px; overflow: hidden; }
@@ -242,35 +254,36 @@ type DrawerMode = 'invoice' | 'payment' | null;
     .cell-primary { font-weight: 500; }
     .cell-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
     .text-muted { color: var(--text-muted); }
+    .amount-pending { font-weight: 600; color: var(--text-primary); }
+    .amount-paid { font-weight: 500; color: #25a265; }
+    .due-label { font-size: 12px; color: var(--text-muted); margin-left: 2px; }
 
     .row-actions { display: flex; gap: 4px; }
     .btn-icon {
       width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--surface-border);
       background: transparent; color: var(--text-muted); cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .12s, color .12s;
+      display: flex; align-items: center; justify-content: center; transition: background .12s, color .12s;
       &:hover { background: var(--surface-bg); color: var(--text-primary); }
     }
-    .btn-icon-success { &:hover { background: rgba(37,162,101,.1); color: #25a265; border-color: rgba(37,162,101,.3); } }
+    .btn-icon-success { color: #25a265; border-color: rgba(37,162,101,.3); background: rgba(37,162,101,.06);
+      &:hover { background: rgba(37,162,101,.12); } }
 
-    .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
-    .badge-pending { background: rgba(245,158,11,.12); color: #d97706; }
-    .badge-paid { background: rgba(37,162,101,.12); color: #25a265; }
-    .badge-overdue, .badge-danger { background: rgba(224,49,49,.12); color: var(--color-danger); }
-    .badge-neutral { background: var(--surface-bg); color: var(--text-muted); }
+    .badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
+    .badge-em-dia { background: rgba(37,162,101,.12); color: #25a265; }
+    .badge-aguardando { background: rgba(245,158,11,.12); color: #d97706; }
+    .badge-inadimplente { background: rgba(224,49,49,.12); color: var(--color-danger); }
+    .badge-sem-faturas { background: var(--surface-bg); color: var(--text-muted); border: 1px solid var(--surface-border); }
 
     /* Drawer */
     .drawer-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,.4);
-      display: flex; justify-content: flex-end; z-index: 200;
-      animation: fadeIn .15s ease;
+      display: flex; justify-content: flex-end; z-index: 200; animation: fadeIn .15s ease;
     }
     @keyframes fadeIn { from{opacity:0} to{opacity:1} }
     .drawer {
       width: 400px; max-width: 95vw; background: var(--surface-card);
       border-left: 1px solid var(--surface-border);
-      display: flex; flex-direction: column; height: 100vh;
-      animation: slideIn .2s ease;
+      display: flex; flex-direction: column; height: 100vh; animation: slideIn .2s ease;
     }
     @keyframes slideIn { from{transform:translateX(40px);opacity:0} to{transform:translateX(0);opacity:1} }
     .drawer-header {
@@ -285,7 +298,6 @@ type DrawerMode = 'invoice' | 'payment' | null;
       &:hover { background: var(--surface-bg); }
     }
     .drawer-body { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
-    .drawer-subtitle { font-size: 13px; color: var(--text-muted); margin: 0 0 4px; }
     .drawer-footer {
       padding: 16px 24px; border-top: 1px solid var(--surface-border);
       display: flex; justify-content: flex-end; gap: 8px;
@@ -293,7 +305,7 @@ type DrawerMode = 'invoice' | 'payment' | null;
 
     .info-card {
       background: var(--surface-bg); border: 1px solid var(--surface-border);
-      border-radius: 10px; padding: 14px 16px; margin-bottom: 4px;
+      border-radius: 10px; padding: 14px 16px;
     }
     .info-card-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
     .info-card-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
@@ -301,15 +313,13 @@ type DrawerMode = 'invoice' | 'payment' | null;
     .input-group {
       display: flex; align-items: center;
       border: 1px solid var(--surface-border); border-radius: 8px;
-      background: var(--surface-card); overflow: hidden;
-      transition: border-color .15s;
+      background: var(--surface-card); overflow: hidden; transition: border-color .15s;
       &:focus-within { border-color: var(--color-brand); }
     }
     .input-addon {
-      padding: 0 12px; font-size: 13px; font-weight: 600;
-      color: var(--text-muted); border-right: 1px solid var(--surface-border);
-      background: var(--surface-bg); align-self: stretch;
-      display: flex; align-items: center;
+      padding: 0 12px; font-size: 13px; font-weight: 600; color: var(--text-muted);
+      border-right: 1px solid var(--surface-border); background: var(--surface-bg);
+      align-self: stretch; display: flex; align-items: center;
     }
     .input-group-field {
       flex: 1; min-width: 0; border: none !important; outline: none;
@@ -346,7 +356,6 @@ export class SubscriptionsComponent implements OnInit {
 
   searchTerm = signal('');
   filterStatus = signal('');
-  invoiceAmount: number | null = null;
   invoiceAmountStr = '';
   invoiceDueDate = '';
   paymentPaidAt = '';
@@ -359,8 +368,7 @@ export class SubscriptionsComponent implements OnInit {
     const q = this.searchTerm().toLowerCase();
     if (q) list = list.filter(s => s.tenantName.toLowerCase().includes(q) || s.tenantSlug.toLowerCase().includes(q));
     const fs = this.filterStatus();
-    if (fs === 'none') list = list.filter(s => !s.latestInvoiceStatus);
-    else if (fs) list = list.filter(s => s.latestInvoiceStatus === fs);
+    if (fs) list = list.filter(s => s.status === fs);
     return list;
   });
 
@@ -374,25 +382,36 @@ export class SubscriptionsComponent implements OnInit {
     });
   }
 
-  pendingInvoice(s: SubscriptionDto): InvoiceDto | undefined {
-    return s.invoices.find(i => i.status === 'Pending' || i.status === 'Overdue');
+  // Retorna a fatura pendente/em atraso mais antiga (a que precisa de ação)
+  openInvoice(s: SubscriptionDto): InvoiceDto | undefined {
+    return s.invoices
+      .filter(i => i.status === 'Pending' || i.status === 'Overdue')
+      .sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
   }
 
-  openInvoice(s: SubscriptionDto) {
+  // Retorna o último pagamento confirmado
+  lastPaid(s: SubscriptionDto): InvoiceDto | undefined {
+    return s.invoices
+      .filter(i => i.status === 'Paid')
+      .sort((a, b) => b.dueDate.localeCompare(a.dueDate))[0];
+  }
+
+  openInvoiceDrawer(s: SubscriptionDto) {
     this.selected.set(s);
-    this.invoiceAmount = null;
     this.invoiceAmountStr = '';
-    this.invoiceDueDate = s.nextDueDate;
+    // nextDueDate vem como "YYYY-MM-DD" do DateOnly do .NET
+    this.invoiceDueDate = s.nextDueDate.split('T')[0];
     this.drawer.set('invoice');
   }
 
-  openPayment(s: SubscriptionDto) {
+  openPaymentDrawer(s: SubscriptionDto) {
     this.selected.set(s);
     const today = new Date();
-    this.paymentPaidAt = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-    const [y, m, day] = s.nextDueDate.split('T')[0].split('-').map(Number);
-    const next = new Date(y, m, day); // month+1 because Date months are 0-indexed, m is already 1-indexed so m acts as m+1
-    this.paymentNextDueDate = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
+    this.paymentPaidAt = today.toISOString().split('T')[0];
+    // Avança 1 mês a partir do nextDueDate
+    const nd = new Date(s.nextDueDate.split('T')[0] + 'T12:00:00');
+    nd.setMonth(nd.getMonth() + 1);
+    this.paymentNextDueDate = nd.toISOString().split('T')[0];
     this.paymentRef = '';
     this.paymentNotes = '';
     this.drawer.set('payment');
@@ -403,16 +422,15 @@ export class SubscriptionsComponent implements OnInit {
   generateInvoice() {
     const parsed = parseFloat(this.invoiceAmountStr.replace(',', '.'));
     if (!parsed || isNaN(parsed) || !this.invoiceDueDate) return;
-    this.invoiceAmount = parsed;
     this.acting.set(true);
-    this.svc.generateInvoice(this.selected()!.id, { amount: this.invoiceAmount, dueDate: this.invoiceDueDate }).subscribe({
-      next: () => { this.toast.show('Fatura gerada com sucesso.'); this.closeDrawer(); this.load(); },
+    this.svc.generateInvoice(this.selected()!.id, { amount: parsed, dueDate: this.invoiceDueDate }).subscribe({
+      next: () => { this.toast.show('Fatura gerada com sucesso.'); this.closeDrawer(); this.load(); this.acting.set(false); },
       error: () => { this.toast.show('Erro ao gerar fatura.', 'error'); this.acting.set(false); }
     });
   }
 
   confirmPayment() {
-    const invoice = this.pendingInvoice(this.selected()!);
+    const invoice = this.openInvoice(this.selected()!);
     if (!invoice || !this.paymentPaidAt || !this.paymentNextDueDate) return;
     this.acting.set(true);
     this.svc.confirmPayment(this.selected()!.id, invoice.id, {
@@ -421,20 +439,30 @@ export class SubscriptionsComponent implements OnInit {
       paymentReference: this.paymentRef || null,
       notes: this.paymentNotes || null
     }).subscribe({
-      next: () => { this.toast.show('Pagamento confirmado.'); this.closeDrawer(); this.load(); },
+      next: () => { this.toast.show('Pagamento confirmado.'); this.closeDrawer(); this.load(); this.acting.set(false); },
       error: () => { this.toast.show('Erro ao confirmar pagamento.', 'error'); this.acting.set(false); }
     });
   }
 
-  statusLabel(s: string) {
-    return { Pending: 'Pendente', Paid: 'Pago', Overdue: 'Atrasado' }[s] ?? s;
+  statusLabel(s: SubscriptionDto['status']) {
+    return {
+      EmDia: 'Em dia',
+      AguardandoPagamento: 'Aguardando pagamento',
+      Inadimplente: 'Inadimplente',
+      SemFaturas: 'Sem faturas',
+    }[s] ?? s;
   }
 
-  statusClass(s: string) {
-    return { Pending: 'badge-pending', Paid: 'badge-paid', Overdue: 'badge-overdue' }[s] ?? 'badge-neutral';
+  statusClass(s: SubscriptionDto['status']) {
+    return {
+      EmDia: 'badge-em-dia',
+      AguardandoPagamento: 'badge-aguardando',
+      Inadimplente: 'badge-inadimplente',
+      SemFaturas: 'badge-sem-faturas',
+    }[s] ?? '';
   }
 
-  formatDate(d: string) {
+  formatDate(d: string | undefined | null) {
     if (!d) return '–';
     const [y, m, day] = d.split('T')[0].split('-');
     return `${day}/${m}/${y}`;

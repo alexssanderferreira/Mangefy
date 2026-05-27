@@ -27,6 +27,7 @@ export interface SubscriptionDto {
   latestInvoiceDueDate: string | null;
   overdueCount: number;
   invoices: InvoiceDto[];
+  status: 'SemFaturas' | 'EmDia' | 'AguardandoPagamento' | 'Inadimplente';
 }
 
 export interface GenerateInvoiceRequest {
@@ -48,6 +49,7 @@ export class SubscriptionService {
 
   getAll() { return this.http.get<SubscriptionDto[]>(this.base); }
   getOverdue() { return this.http.get<SubscriptionDto[]>(`${this.base}/overdue`); }
+  getByTenant(tenantId: string) { return this.http.get<SubscriptionDto>(`${this.base}/by-tenant/${tenantId}`); }
 
   generateInvoice(subscriptionId: string, req: GenerateInvoiceRequest) {
     return this.http.post<{ invoiceId: string }>(`${this.base}/${subscriptionId}/invoices`, req);

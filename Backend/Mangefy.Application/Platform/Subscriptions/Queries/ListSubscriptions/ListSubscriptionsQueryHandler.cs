@@ -30,12 +30,25 @@ public sealed class ListSubscriptionsQueryHandler : IRequestHandler<ListSubscrip
 
         var tenantMap = tenants.ToDictionary(t => t.Id);
         var planMap = plans.ToDictionary(p => p.Id);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
         return subscriptions.Select(s =>
         {
+            s.MarkOverdueInvoices(today);
+
             var tenant = tenantMap.GetValueOrDefault(s.TenantId);
             var plan = planMap.GetValueOrDefault(s.PlanId);
             var latest = s.GetLatestInvoice();
+            var overdueCount = s.Invoices.Count(i => i.Status == InvoiceStatus.Overdue);
+
+            var status = overdueCount > 0
+                ? "Inadimplente"
+                : s.Invoices.Any(i => i.Status == InvoiceStatus.Pending)
+                    ? "AguardandoPagamento"
+                    : latest?.Status == InvoiceStatus.Paid
+                        ? "EmDia"
+                        : "SemFaturas";
+
             return new SubscriptionDto(
                 s.Id,
                 s.TenantId,
@@ -48,7 +61,7 @@ public sealed class ListSubscriptionsQueryHandler : IRequestHandler<ListSubscrip
                 latest?.Status.ToString(),
                 latest?.Amount.Amount,
                 latest?.DueDate,
-                s.Invoices.Count(i => i.Status == Domain.Platform.Subscriptions.InvoiceStatus.Overdue),
+                overdueCount,
                 s.Invoices.Select(i => new InvoiceDto(
                     i.Id,
                     i.Amount.Amount,
@@ -57,7 +70,8 @@ public sealed class ListSubscriptionsQueryHandler : IRequestHandler<ListSubscrip
                     i.PaidAt,
                     i.Status.ToString(),
                     i.PaymentReference,
-                    i.Notes)).ToList());
+                    i.Notes)).ToList(),
+                status);
         }).ToList();
     }
 }

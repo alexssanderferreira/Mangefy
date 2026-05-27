@@ -22,7 +22,7 @@ public sealed class GenerateInvoiceCommandHandler : IRequestHandler<GenerateInvo
             ?? throw new DomainException("Assinatura não encontrada.");
 
         var invoice = subscription.GenerateInvoice(request.Amount, request.DueDate);
-        await _subscriptions.AddInvoiceAsync(invoice, cancellationToken);
+        await _subscriptions.UpdateAsync(subscription, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
         return invoice.Id;
     }

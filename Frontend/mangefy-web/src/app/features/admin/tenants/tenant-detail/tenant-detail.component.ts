@@ -6,10 +6,11 @@ import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { TenantService, TenantDto, EmployeeDto } from '../services/tenant.service';
 import { PlansService, PlanDto } from '../../plans/plans.service';
+import { SubscriptionService, SubscriptionDto, InvoiceDto } from '../../subscriptions/subscription.service';
 import { ToastService } from '../../../../core/toast/toast.service';
 import { environment } from '../../../../../environments/environment';
 
-type Tab = 'info' | 'employees';
+type Tab = 'info' | 'employees' | 'financeiro';
 
 interface BusinessTypeDto { id: string; name: string; }
 
@@ -73,6 +74,15 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
         <!-- Tabs -->
         <div class="tabs">
           <button class="tab" [class.active]="activeTab() === 'info'" (click)="activeTab.set('info')">Informações</button>
+          <button class="tab" [class.active]="activeTab() === 'financeiro'" (click)="loadFinanceiroTab()">
+            Financeiro
+            @if (subscription()?.status === 'Inadimplente') {
+              <span class="tab-badge tab-badge-danger">!</span>
+            }
+            @if (subscription()?.status === 'AguardandoPagamento') {
+              <span class="tab-badge tab-badge-warn">·</span>
+            }
+          </button>
           <button class="tab" [class.active]="activeTab() === 'employees'" (click)="loadEmployeesTab()">Funcionários</button>
         </div>
 
@@ -298,6 +308,103 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
           </div>
         }
 
+        <!-- Tab Financeiro -->
+        @if (activeTab() === 'financeiro') {
+          <div class="fin-section">
+            @if (loadingSubscription()) {
+              <div class="loading-state"><div class="spin"></div></div>
+            } @else if (!subscription()) {
+              <div class="fin-empty">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <p>Nenhuma assinatura encontrada para este estabelecimento.</p>
+              </div>
+            } @else {
+              <!-- Status + resumo -->
+              <div class="fin-summary-grid">
+                <div class="fin-summary-card">
+                  <div class="fin-summary-label">Status</div>
+                  <div class="fin-summary-value">
+                    <span [class]="'sub-badge sub-badge-' + subscription()!.status">{{ subStatusLabel(subscription()!.status) }}</span>
+                  </div>
+                </div>
+                <div class="fin-summary-card">
+                  <div class="fin-summary-label">Próximo vencimento</div>
+                  <div class="fin-summary-value">{{ formatDate(subscription()!.nextDueDate) }}</div>
+                </div>
+                <div class="fin-summary-card">
+                  <div class="fin-summary-label">Fatura em aberto</div>
+                  <div class="fin-summary-value">
+                    @if (openInvoice(); as inv) {
+                      <span [class]="inv.status === 'Overdue' ? 'fin-val-danger' : 'fin-val-warn'">R$ {{ inv.amount.toFixed(2) }}</span>
+                      <span class="fin-val-muted">venc. {{ formatDate(inv.dueDate) }}</span>
+                    } @else {
+                      <span class="fin-val-muted">—</span>
+                    }
+                  </div>
+                </div>
+                <div class="fin-summary-card">
+                  <div class="fin-summary-label">Último pagamento</div>
+                  <div class="fin-summary-value">
+                    @if (lastPaid(); as inv) {
+                      <span class="fin-val-ok">R$ {{ inv.amount.toFixed(2) }}</span>
+                      @if (inv.paidAt) { <span class="fin-val-muted">em {{ formatDate(inv.paidAt) }}</span> }
+                    } @else {
+                      <span class="fin-val-muted">—</span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ações -->
+              <div class="fin-actions">
+                @if (!openInvoice()) {
+                  <button class="btn btn-primary btn-sm-act" (click)="openInvoiceDrawer()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    Gerar Fatura
+                  </button>
+                }
+                @if (openInvoice()) {
+                  <button class="btn btn-success btn-sm-act" (click)="openPaymentDrawer()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    Confirmar Pagamento
+                  </button>
+                }
+              </div>
+
+              <!-- Histórico de faturas -->
+              <div class="fin-history">
+                <h4 class="fin-history-title">Histórico de Faturas</h4>
+                @if (subscription()!.invoices.length === 0) {
+                  <div class="fin-no-invoices">Nenhuma fatura gerada ainda.</div>
+                } @else {
+                  <div class="fin-table-wrap">
+                    <table class="fin-table">
+                      <thead><tr>
+                        <th>Vencimento</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                        <th>Pago em</th>
+                        <th>Referência</th>
+                      </tr></thead>
+                      <tbody>
+                        @for (inv of subscription()!.invoices; track inv.id) {
+                          <tr [class.row-overdue]="inv.status === 'Overdue'" [class.row-paid]="inv.status === 'Paid'">
+                            <td>{{ formatDate(inv.dueDate) }}</td>
+                            <td class="td-amount">R$ {{ inv.amount.toFixed(2) }}</td>
+                            <td><span [class]="'inv-badge inv-badge-' + inv.status">{{ invStatusLabel(inv.status) }}</span></td>
+                            <td class="td-muted">{{ inv.paidAt ? formatDate(inv.paidAt) : '—' }}</td>
+                            <td class="td-muted td-ref">{{ inv.paymentReference || '—' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+
         <!-- Tab Funcionários -->
         @if (activeTab() === 'employees') {
           <div class="employees-section">
@@ -335,6 +442,91 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
         }
       }
     </div>
+
+    <!-- Drawer: Gerar Fatura -->
+    @if (finDrawer() === 'invoice' && subscription()) {
+      <div class="drawer-overlay" (click)="finDrawer.set(null)">
+        <div class="drawer" (click)="$event.stopPropagation()">
+          <div class="drawer-header">
+            <h2 class="drawer-title">Gerar Fatura</h2>
+            <button class="drawer-close" (click)="finDrawer.set(null)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="drawer-body">
+            <div class="drawer-info-card">
+              <div class="dic-name">{{ tenant()!.name }}</div>
+              <div class="dic-sub">{{ subscription()!.planName }} · próx. venc. {{ formatDate(subscription()!.nextDueDate) }}</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Valor (R$)</label>
+              <div class="input-group">
+                <span class="input-addon">R$</span>
+                <input class="form-control input-group-field" type="text" inputmode="decimal"
+                  [value]="finAmountStr" (input)="finAmountStr = $any($event.target).value" placeholder="0,00" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Data de vencimento</label>
+              <input class="form-control" type="date" [(ngModel)]="finDueDate" />
+            </div>
+          </div>
+          <div class="drawer-footer">
+            <button class="btn btn-ghost" (click)="finDrawer.set(null)">Cancelar</button>
+            <button class="btn btn-primary" (click)="finGenerateInvoice()" [disabled]="finActing()">
+              {{ finActing() ? 'Aguarde...' : 'Gerar Fatura' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Drawer: Confirmar Pagamento -->
+    @if (finDrawer() === 'payment' && subscription()) {
+      <div class="drawer-overlay" (click)="finDrawer.set(null)">
+        <div class="drawer" (click)="$event.stopPropagation()">
+          <div class="drawer-header">
+            <h2 class="drawer-title">Confirmar Pagamento</h2>
+            <button class="drawer-close" (click)="finDrawer.set(null)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="drawer-body">
+            <div class="drawer-info-card">
+              <div class="dic-name">{{ tenant()!.name }}</div>
+              <div class="dic-sub">Fatura: R$ {{ openInvoice()?.amount?.toFixed(2) }} · venc. {{ formatDate(openInvoice()?.dueDate ?? '') }}</div>
+            </div>
+            @if (subscription()!.overdueCount > 1) {
+              <div class="alert-warn-sm">
+                {{ subscription()!.overdueCount }} faturas em atraso. O pagamento será aplicado à mais antiga.
+              </div>
+            }
+            <div class="form-group">
+              <label class="form-label">Data do pagamento</label>
+              <input class="form-control" type="date" [(ngModel)]="finPaidAt" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Próximo vencimento</label>
+              <input class="form-control" type="date" [(ngModel)]="finNextDueDate" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Referência de pagamento</label>
+              <input class="form-control" type="text" [(ngModel)]="finPaymentRef" placeholder="Número do boleto, código PIX..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Observações</label>
+              <textarea class="form-control" rows="3" [(ngModel)]="finNotes"></textarea>
+            </div>
+          </div>
+          <div class="drawer-footer">
+            <button class="btn btn-ghost" (click)="finDrawer.set(null)">Cancelar</button>
+            <button class="btn btn-primary" (click)="finConfirmPayment()" [disabled]="finActing()">
+              {{ finActing() ? 'Aguarde...' : 'Confirmar Pagamento' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
 
     <!-- Modal cancelamento -->
     @if (cancelModal()) {
@@ -619,6 +811,147 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
 
     .empty-state { text-align: center; padding: 60px; color: #ccc; }
 
+    /* Tab badges */
+    .tab-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; border-radius: 99px; font-size: 10px; font-weight: 800;
+      margin-left: 5px; line-height: 1;
+    }
+    .tab-badge-danger { background: #fee2e2; color: #b91c1c; }
+    .tab-badge-warn   { background: #fef3c7; color: #b45309; font-size: 16px; height: 14px; }
+
+    /* Financeiro section */
+    .fin-section { display: flex; flex-direction: column; gap: 20px; }
+    .fin-empty {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      padding: 48px; color: #aaa; text-align: center;
+      svg { color: #ccc; }
+      p { font-size: 14px; margin: 0; }
+    }
+
+    .fin-summary-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    }
+    .fin-summary-card {
+      background: #fff; border: 1px solid #e8e8ec; border-radius: 12px; padding: 16px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .fin-summary-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #aaa; }
+    .fin-summary-value { display: flex; flex-direction: column; gap: 2px; font-size: 14px; font-weight: 600; color: #111; }
+    .fin-val-ok      { color: #15803d; }
+    .fin-val-warn    { color: #b45309; }
+    .fin-val-danger  { color: #b91c1c; }
+    .fin-val-muted   { font-size: 11px; color: #aaa; font-weight: 400; }
+
+    .fin-actions { display: flex; gap: 10px; }
+    .btn-sm-act { font-size: 13px; padding: 8px 16px; }
+
+    .fin-history { background: #fff; border: 1px solid #e8e8ec; border-radius: 12px; overflow: hidden; }
+    .fin-history-title {
+      font-size: 13px; font-weight: 700; color: #555;
+      padding: 16px 20px; border-bottom: 1px solid #f0f0f3; margin: 0;
+    }
+    .fin-no-invoices { padding: 32px; text-align: center; color: #ccc; font-size: 13px; }
+    .fin-table-wrap { overflow-x: auto; }
+    .fin-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+      th {
+        padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .05em; color: #aaa;
+        background: #fafafa; border-bottom: 1px solid #f0f0f3;
+      }
+      td { padding: 12px 16px; border-bottom: 1px solid #f4f4f6; color: #333; vertical-align: middle; }
+      tr:last-child td { border-bottom: none; }
+    }
+    .td-amount { font-weight: 600; }
+    .td-muted { color: #999; font-size: 12px; }
+    .td-ref { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .row-overdue td { background: rgba(220,38,38,.03); }
+    .row-paid td { background: rgba(21,128,61,.02); }
+
+    /* Status badges */
+    .sub-badge {
+      display: inline-block; padding: 4px 12px; border-radius: 99px;
+      font-size: 12px; font-weight: 700; white-space: nowrap;
+    }
+    .sub-badge-EmDia              { background: #dcfce7; color: #15803d; }
+    .sub-badge-AguardandoPagamento{ background: #fef3c7; color: #b45309; }
+    .sub-badge-Inadimplente       { background: #fee2e2; color: #b91c1c; }
+    .sub-badge-SemFaturas         { background: #f4f4f5; color: #71717a; }
+
+    .inv-badge {
+      display: inline-block; padding: 2px 9px; border-radius: 99px;
+      font-size: 11px; font-weight: 700;
+    }
+    .inv-badge-Paid    { background: #dcfce7; color: #15803d; }
+    .inv-badge-Pending { background: #fef3c7; color: #b45309; }
+    .inv-badge-Overdue { background: #fee2e2; color: #b91c1c; }
+
+    /* Drawer */
+    .drawer-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200;
+      display: flex; justify-content: flex-end; animation: fadeInDr .15s ease;
+    }
+    @keyframes fadeInDr { from{opacity:0} to{opacity:1} }
+    .drawer {
+      width: 400px; max-width: 95vw; background: #fff;
+      border-left: 1px solid #e8e8ec;
+      display: flex; flex-direction: column; height: 100vh; animation: slideInDr .2s ease;
+    }
+    @keyframes slideInDr { from{transform:translateX(40px);opacity:0} to{transform:translateX(0);opacity:1} }
+    .drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px; border-bottom: 1px solid #e8e8ec;
+    }
+    .drawer-title { font-size: 16px; font-weight: 700; color: #111; margin: 0; }
+    .drawer-close {
+      width: 28px; height: 28px; border-radius: 6px; border: none;
+      background: transparent; color: #aaa; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      &:hover { background: #f0f0f3; }
+    }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .drawer-footer {
+      padding: 16px 24px; border-top: 1px solid #e8e8ec;
+      display: flex; justify-content: flex-end; gap: 8px;
+    }
+    .drawer-info-card {
+      background: #f9f9fb; border: 1px solid #e8e8ec; border-radius: 10px; padding: 14px 16px;
+    }
+    .dic-name { font-size: 14px; font-weight: 600; color: #111; }
+    .dic-sub  { font-size: 12px; color: #aaa; margin-top: 3px; }
+
+    .alert-warn-sm {
+      background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px;
+      padding: 10px 14px; font-size: 13px; color: #b45309;
+    }
+
+    .input-group {
+      display: flex; align-items: center;
+      border: 1px solid #e8e8ec; border-radius: 8px;
+      overflow: hidden; transition: border-color .15s;
+      &:focus-within { border-color: var(--color-brand); }
+    }
+    .input-addon {
+      padding: 0 12px; font-size: 13px; font-weight: 600; color: #aaa;
+      border-right: 1px solid #e8e8ec; background: #f9f9fb;
+      align-self: stretch; display: flex; align-items: center;
+    }
+    .input-group-field {
+      flex: 1; border: none !important; outline: none;
+      background: transparent !important; padding: 10px 12px;
+      font-size: 14px; color: #111; border-radius: 0 !important;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 12px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: .5px; }
+    .form-control {
+      padding: 9px 12px; border: 1px solid #e8e8ec; border-radius: 8px;
+      background: #f9f9fb; color: #111; font-size: 13.5px; outline: none;
+      &:focus { border-color: var(--color-brand); }
+    }
+    textarea.form-control { resize: vertical; font-family: inherit; }
+
     @media (max-width: 768px) {
       .page { padding: 14px; max-width: 100%; }
       .info-layout { grid-template-columns: 1fr; }
@@ -639,6 +972,7 @@ export class TenantDetailComponent implements OnInit {
   private router   = inject(Router);
   private svc      = inject(TenantService);
   private plansSvc = inject(PlansService);
+  private subSvc   = inject(SubscriptionService);
   private http     = inject(HttpClient);
   private toast    = inject(ToastService);
 
@@ -658,6 +992,30 @@ export class TenantDetailComponent implements OnInit {
   selectedPlanId       = '';
   changingBusinessType = signal(false);
   selectedBusinessTypeId = '';
+
+  // Financeiro
+  subscription        = signal<SubscriptionDto | null>(null);
+  loadingSubscription = signal(false);
+  finDrawer  = signal<'invoice' | 'payment' | null>(null);
+  finActing  = signal(false);
+  finAmountStr = '';
+  finDueDate   = '';
+  finPaidAt    = '';
+  finNextDueDate = '';
+  finPaymentRef  = '';
+  finNotes       = '';
+
+  openInvoice() {
+    return this.subscription()?.invoices
+      .filter(i => i.status === 'Pending' || i.status === 'Overdue')
+      .sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
+  }
+
+  lastPaid() {
+    return this.subscription()?.invoices
+      .filter(i => i.status === 'Paid')
+      .sort((a, b) => b.dueDate.localeCompare(a.dueDate))[0];
+  }
 
   editing    = signal(false);
   saving     = signal(false);
@@ -815,6 +1173,85 @@ export class TenantDetailComponent implements OnInit {
       next:  es => { this.employees.set(es); this.loadingEmployees.set(false); },
       error: () => this.loadingEmployees.set(false),
     });
+  }
+
+  loadFinanceiroTab() {
+    this.activeTab.set('financeiro');
+    if (this.subscription() !== null || this.loadingSubscription()) return;
+    this.loadingSubscription.set(true);
+    this.subSvc.getByTenant(this.tenant()!.id).subscribe({
+      next: sub => { this.subscription.set(sub); this.loadingSubscription.set(false); },
+      error: () => { this.subscription.set(null); this.loadingSubscription.set(false); },
+    });
+  }
+
+  openInvoiceDrawer() {
+    this.finAmountStr = '';
+    this.finDueDate = this.subscription()!.nextDueDate.split('T')[0];
+    this.finDrawer.set('invoice');
+  }
+
+  openPaymentDrawer() {
+    const nd = new Date(this.subscription()!.nextDueDate.split('T')[0] + 'T12:00:00');
+    nd.setMonth(nd.getMonth() + 1);
+    this.finPaidAt = new Date().toISOString().split('T')[0];
+    this.finNextDueDate = nd.toISOString().split('T')[0];
+    this.finPaymentRef = '';
+    this.finNotes = '';
+    this.finDrawer.set('payment');
+  }
+
+  finGenerateInvoice() {
+    const amount = parseFloat(this.finAmountStr.replace(',', '.'));
+    if (!amount || isNaN(amount) || !this.finDueDate) return;
+    this.finActing.set(true);
+    this.subSvc.generateInvoice(this.subscription()!.id, { amount, dueDate: this.finDueDate }).subscribe({
+      next: () => {
+        this.toast.success('Fatura gerada com sucesso.');
+        this.finDrawer.set(null);
+        this.finActing.set(false);
+        this.reloadSubscription();
+      },
+      error: () => { this.toast.error('Erro ao gerar fatura.'); this.finActing.set(false); },
+    });
+  }
+
+  finConfirmPayment() {
+    const inv = this.openInvoice();
+    if (!inv || !this.finPaidAt || !this.finNextDueDate) return;
+    this.finActing.set(true);
+    this.subSvc.confirmPayment(this.subscription()!.id, inv.id, {
+      paidAt: this.finPaidAt,
+      nextDueDate: this.finNextDueDate,
+      paymentReference: this.finPaymentRef || null,
+      notes: this.finNotes || null,
+    }).subscribe({
+      next: () => {
+        this.toast.success('Pagamento confirmado.');
+        this.finDrawer.set(null);
+        this.finActing.set(false);
+        this.reloadSubscription();
+      },
+      error: () => { this.toast.error('Erro ao confirmar pagamento.'); this.finActing.set(false); },
+    });
+  }
+
+  private reloadSubscription() {
+    this.subSvc.getByTenant(this.tenant()!.id).subscribe(sub => this.subscription.set(sub));
+  }
+
+  subStatusLabel(s: string) {
+    return { EmDia: 'Em dia', AguardandoPagamento: 'Aguardando pagamento', Inadimplente: 'Inadimplente', SemFaturas: 'Sem faturas' }[s] ?? s;
+  }
+
+  invStatusLabel(s: string) {
+    return { Paid: 'Pago', Pending: 'Pendente', Overdue: 'Em atraso' }[s] ?? s;
+  }
+
+  formatDate(d: string | undefined | null) {
+    if (!d) return '—';
+    const [y, m, day] = d.split('T')[0].split('-');
+    return `${day}/${m}/${y}`;
   }
 
   daysLeft(d: string)            { return this.svc.daysUntil(d); }

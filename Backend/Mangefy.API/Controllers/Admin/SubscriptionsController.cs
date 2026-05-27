@@ -3,6 +3,7 @@ using Mangefy.Application.Platform.Subscriptions.Commands.ConfirmPayment;
 using Mangefy.Application.Platform.Subscriptions.Commands.CreateSubscription;
 using Mangefy.Application.Platform.Subscriptions.Commands.GenerateInvoice;
 using Mangefy.Application.Platform.Subscriptions.Queries.GetOverdueSubscriptions;
+using Mangefy.Application.Platform.Subscriptions.Queries.GetSubscriptionByTenant;
 using Mangefy.Application.Platform.Subscriptions.Queries.ListSubscriptions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -36,6 +37,13 @@ public sealed class SubscriptionsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken ct)
         => Ok(await _sender.Send(new ListSubscriptionsQuery(), ct));
+
+    [HttpGet("by-tenant/{tenantId:guid}")]
+    public async Task<IActionResult> ByTenant(Guid tenantId, CancellationToken ct)
+    {
+        var result = await _sender.Send(new GetSubscriptionByTenantQuery(tenantId), ct);
+        return result is null ? NotFound() : Ok(result);
+    }
 
     [HttpGet("overdue")]
     public async Task<IActionResult> Overdue(CancellationToken ct)

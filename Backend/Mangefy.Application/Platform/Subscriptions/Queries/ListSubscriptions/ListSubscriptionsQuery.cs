@@ -17,7 +17,10 @@ public sealed record SubscriptionDto(
     decimal? LatestInvoiceAmount,
     DateOnly? LatestInvoiceDueDate,
     int OverdueCount,
-    IReadOnlyList<InvoiceDto> Invoices);
+    IReadOnlyList<InvoiceDto> Invoices,
+    string Status);
+
+// Status possíveis: SemFaturas | EmDia | AguardandoPagamento | Inadimplente
 
 public sealed record InvoiceDto(
     Guid Id,
