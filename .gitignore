@@ -102,6 +102,11 @@ dist/
 credenciais.md
 .claude/
 
+## Runtime logs
+*.log
+*_output.txt
+backend.log
+
 ## OS
 
 # macOS
