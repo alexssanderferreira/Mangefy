@@ -1,9 +1,11 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { DatePipe, NgClass, TitleCasePipe, DecimalPipe } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { TenantService, TenantDto } from '../tenants/services/tenant.service';
 import { PlansService, PlanDto } from '../plans/plans.service';
+import { SubscriptionService } from '../subscriptions/subscription.service';
+import { OwnerService } from '../owners/owner.service';
 
 type Filter = 'all' | 'Active' | 'TrialPeriod' | 'Suspended' | 'Cancelled';
 
@@ -23,13 +25,48 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
           <h1 class="page-title">Dashboard</h1>
           <p class="page-subtitle">Visão Geral Da Plataforma · {{ today | date:'EEEE, d MMM. yyyy' | titlecase }}</p>
         </div>
-        @if (activeFilter() !== 'all') {
-          <button class="clear-filter" (click)="setFilter('all')">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Limpar filtro
+        <div class="header-actions">
+          @if (activeFilter() !== 'all') {
+            <button class="clear-filter" (click)="setFilter('all')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Limpar filtro
+            </button>
+          }
+          @if (lastUpdated()) {
+            <span class="last-updated">Atualizado às {{ lastUpdated() | date:'HH:mm' }}</span>
+          }
+          <button class="reload-btn" (click)="reload()" [disabled]="loading()" title="Recarregar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" [class.spinning]="loading()"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
           </button>
-        }
+        </div>
       </div>
+
+      <!-- Atenção -->
+      @if (!loading()) {
+        <div class="attention-band">
+          @if (actionItems().length === 0) {
+            <div class="all-ok">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Tudo em ordem — nenhuma ação pendente
+            </div>
+          } @else {
+            <span class="attention-label">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Requer atenção
+            </span>
+            <div class="attention-chips">
+              @for (item of actionItems(); track item.label) {
+                <button class="att-chip" [style.--cc]="item.color" [style.--cbg]="item.bg"
+                        (click)="router.navigate([item.route], { queryParams: item.params })">
+                  <span class="att-count">{{ item.count }}</span>
+                  <span class="att-label">{{ item.label }}</span>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
 
       <!-- Main two-column layout -->
       <div class="main-layout">
@@ -253,15 +290,55 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
     .page { padding: 24px 28px; }
 
     /* Header */
-    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .page-title  { font-size: 22px; font-weight: 700; color: #111; }
     .page-subtitle { font-size: 12px; color: #aaa; margin-top: 2px; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .last-updated { font-size: 11px; color: #bbb; white-space: nowrap; }
     .clear-filter {
       display: flex; align-items: center; gap: 6px; padding: 6px 14px;
       border-radius: 8px; border: 1px solid #e8e8ec; background: #fff; color: #555;
       font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s;
       &:hover { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
     }
+    .reload-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px;
+      border: 1px solid #e8e8ec; background: #fff; color: #888; cursor: pointer; transition: all .15s;
+      &:hover { background: #f5f5f7; color: #333; }
+      &:disabled { opacity: .4; cursor: default; }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinning { animation: spin .8s linear infinite; }
+
+    /* Attention band */
+    .attention-band {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      background: #fff; border: 1px solid #e8e8ec; border-radius: 10px;
+      padding: 10px 16px; margin-bottom: 18px;
+    }
+    .all-ok {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 12px; font-weight: 600; color: #16a34a;
+    }
+    .attention-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; color: #b45309; white-space: nowrap;
+    }
+    .attention-chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .att-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px 4px 8px; border-radius: 99px; border: none; cursor: pointer;
+      background: var(--cbg); color: var(--cc); font-size: 11px; font-weight: 700;
+      transition: filter .15s;
+      &:hover { filter: brightness(.94); }
+    }
+    .att-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--cc); color: #fff; font-size: 10px; font-weight: 800;
+    }
+    .att-label { font-weight: 600; }
 
     /* Section label */
     .section-label {
@@ -485,16 +562,38 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
   `]
 })
 export class DashboardComponent implements OnInit {
-  svc      = inject(TenantService);
-  plansSvc = inject(PlansService);
+  svc            = inject(TenantService);
+  plansSvc       = inject(PlansService);
+  subscriptionSvc = inject(SubscriptionService);
+  ownerSvc       = inject(OwnerService);
+  router         = inject(Router);
 
   today   = new Date();
   loading = signal(true);
   error   = signal('');
   tenants = signal<TenantDto[]>([]);
   plans   = signal<PlanDto[]>([]);
+  overdueCount       = signal(0);
+  pendingOwnersCount = signal(0);
+  lastUpdated        = signal<Date | null>(null);
 
   activeFilter = signal<Filter>('all');
+
+  // ─── Action items ──────────────────────────────────────────────────────────
+
+  actionItems = computed(() => {
+    const m        = this.metrics();
+    const trials   = m?.trialsExpiringSoon?.length ?? 0;
+    const overdue  = this.overdueCount();
+    const suspended = m?.suspended ?? 0;
+    const pending  = this.pendingOwnersCount();
+    const items: { count: number; label: string; route: string; params: Record<string, string>; color: string; bg: string }[] = [];
+    if (trials   > 0) items.push({ count: trials,   label: `trial${trials   !== 1 ? 's' : ''} vencendo`,      route: '/admin/tenants', params: { status: 'TrialPeriod' },          color: '#d97706', bg: '#fef3c7' });
+    if (overdue  > 0) items.push({ count: overdue,  label: `inadimplente${overdue  !== 1 ? 's' : ''}`,        route: '/admin/overdue', params: {},                                  color: '#dc2626', bg: '#fee2e2' });
+    if (suspended > 0) items.push({ count: suspended, label: `suspenso${suspended !== 1 ? 's' : ''}`,         route: '/admin/tenants', params: { status: 'Suspended' },             color: '#ea580c', bg: '#fff7ed' });
+    if (pending  > 0) items.push({ count: pending,  label: `aguardando ativação`,                             route: '/admin/owners',  params: { status: 'PendingActivation' },     color: '#2563eb', bg: '#dbeafe' });
+    return items;
+  });
 
   // ─── Derived metrics ───────────────────────────────────────────────────────
 
@@ -703,15 +802,27 @@ export class DashboardComponent implements OnInit {
     return d <= 3 ? 'urgent' : d <= 7 ? 'warning' : 'ok';
   }
 
-  ngOnInit() {
+  reload() { this.load(); }
+
+  ngOnInit() { this.load(); }
+
+  private load() {
+    this.loading.set(true);
+    this.error.set('');
     forkJoin({
       tenants: this.svc.getPaged(1, 500),
-      plans:   this.plansSvc.getAll()
+      plans:   this.plansSvc.getAll(),
+      overdue: this.subscriptionSvc.getOverdue(),
+      owners:  this.ownerSvc.getAll(1, 500),
     }).subscribe({
-      next: ({ tenants, plans }) => {
+      next: ({ tenants, plans, overdue, owners }) => {
         const items = Array.isArray(tenants) ? tenants : (tenants as any).items ?? [];
+        const ownerItems: any[] = Array.isArray(owners) ? owners : (owners as any).items ?? [];
         this.tenants.set(items);
         this.plans.set(plans);
+        this.overdueCount.set(overdue.length);
+        this.pendingOwnersCount.set(ownerItems.filter((o: any) => o.status === 'PendingActivation').length);
+        this.lastUpdated.set(new Date());
         this.loading.set(false);
       },
       error: () => { this.error.set('Não foi possível carregar os dados.'); this.loading.set(false); }

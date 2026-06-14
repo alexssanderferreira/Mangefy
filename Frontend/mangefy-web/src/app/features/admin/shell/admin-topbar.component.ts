@@ -7,6 +7,8 @@ import { filter, map, startWith } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../environments/environment';
 
+const ENV_LABEL = environment.production ? null : 'DEV';
+
 @Component({
   selector: 'app-admin-topbar',
   standalone: true,
@@ -29,6 +31,9 @@ import { environment } from '../../../../environments/environment';
       </div>
 
       <div class="topbar-right">
+        @if (envLabel) {
+          <span class="env-badge">{{ envLabel }}</span>
+        }
         <!-- API Status -->
         <div class="api-status" [class.online]="apiOnline()" [class.offline]="!apiOnline()" [class.checking]="apiChecking()">
           <span class="api-dot"></span>
@@ -38,7 +43,6 @@ import { environment } from '../../../../environments/environment';
             @else { API Offline }
           </span>
         </div>
-
       </div>
     </header>
   `,
@@ -138,6 +142,13 @@ import { environment } from '../../../../environments/environment';
 
     .api-label { white-space: nowrap; }
 
+    .env-badge {
+      font-size: 9px; font-weight: 800; letter-spacing: .8px;
+      padding: 3px 8px; border-radius: 4px;
+      background: rgba(37,99,235,.12); color: #1d4ed8;
+      border: 1px solid rgba(37,99,235,.2);
+    }
+
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50%       { opacity: .35; }
@@ -148,7 +159,8 @@ export class AdminTopbarComponent implements OnInit, OnDestroy {
   private auth   = inject(AuthService);
   private router = inject(Router);
   private http   = inject(HttpClient);
-  layout = inject(LayoutService);
+  layout   = inject(LayoutService);
+  envLabel = ENV_LABEL;
 
   apiOnline  = signal(false);
   apiChecking = signal(true);
@@ -157,7 +169,7 @@ export class AdminTopbarComponent implements OnInit, OnDestroy {
 
   private routeLabels: Record<string, string> = {
     'dashboard':            'Dashboard',
-    'owners':               'Clientes',
+    'owners':               'Responsáveis',
     'tenants':              'Estabelecimentos',
     'plans':                'Planos',
     'subscriptions':        'Assinaturas',

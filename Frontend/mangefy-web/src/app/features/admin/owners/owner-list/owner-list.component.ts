@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -19,20 +19,34 @@ const STATUS_LABEL: Record<string, string> = {
       <!-- Header -->
       <div class="page-header">
         <div>
-          <h1 class="page-title">Clientes</h1>
-          <p class="page-subtitle">{{ total() }} cliente{{ total() !== 1 ? 's' : '' }} cadastrado{{ total() !== 1 ? 's' : '' }}</p>
+          <h1 class="page-title">Responsáveis</h1>
+          <p class="page-subtitle">{{ total() }} responsável{{ total() !== 1 ? 'is' : '' }} cadastrado{{ total() !== 1 ? 's' : '' }}</p>
         </div>
         <button class="btn btn-primary" (click)="openCreate()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Novo Cliente
+          Novo Responsável
         </button>
+      </div>
+
+      <!-- Quick filter tabs -->
+      <div class="qtabs">
+        <button class="qtab" [class.active]="filterStatus() === ''"                  (click)="filterStatus.set('')">Todos</button>
+        <button class="qtab" [class.active]="filterStatus() === 'Active'"             (click)="filterStatus.set('Active')">Ativos</button>
+        <button class="qtab" [class.active]="filterStatus() === 'PendingActivation'"  (click)="filterStatus.set('PendingActivation')">Aguardando ativação</button>
+        <button class="qtab" [class.active]="filterStatus() === 'Inactive'"           (click)="filterStatus.set('Inactive')">Inativos</button>
+        @if (search() || filterStatus()) {
+          <button class="qtab-clear" (click)="search.set(''); filterStatus.set('')">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Limpar filtros
+          </button>
+        }
       </div>
 
       <!-- Filtro -->
       <div class="filters">
         <div class="search-wrap">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="search-input" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Buscar cliente por nome ou e-mail..." />
+          <input class="search-input" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Buscar responsável por nome ou e-mail..." />
         </div>
       </div>
 
@@ -46,7 +60,7 @@ const STATUS_LABEL: Record<string, string> = {
         <table class="table">
           <thead>
             <tr>
-              <th>Cliente</th>
+              <th>Responsável</th>
               <th>E-mail</th>
               <th>Status</th>
               <th>Estabelecimentos</th>
@@ -67,7 +81,7 @@ const STATUS_LABEL: Record<string, string> = {
                 </tr>
               }
             } @else if (filtered().length === 0) {
-              <tr><td colspan="6" class="empty-cell">Nenhum cliente encontrado.</td></tr>
+              <tr><td colspan="6" class="empty-cell">Nenhum responsável encontrado.</td></tr>
             } @else {
               @for (o of filtered(); track o.id) {
                 <tr class="table-row" (click)="goDetail(o.id)">
@@ -117,8 +131,8 @@ const STATUS_LABEL: Record<string, string> = {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
             <div>
-              <h3 class="drawer-title">Novo Cliente</h3>
-              <p class="drawer-subtitle">Preencha os dados do cliente</p>
+              <h3 class="drawer-title">Novo Responsável</h3>
+              <p class="drawer-subtitle">Preencha os dados do responsável</p>
             </div>
           </div>
           <button class="btn-close" (click)="closeDrawer()">
@@ -314,6 +328,11 @@ const STATUS_LABEL: Record<string, string> = {
       &-Inactive         { background: #f4f4f5; color: #71717a; }
     }
 
+    /* Quick filter tabs */
+    .qtabs { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
+    .qtab { padding: 5px 14px; border-radius: 99px; border: 1px solid #e8e8ec; background: #fff; color: #666; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; &:hover { background: #f5f5f7; border-color: #d0d0d8; color: #333; } &.active { background: var(--color-brand); color: #fff; border-color: transparent; } }
+    .qtab-clear { display: inline-flex; align-items: center; gap: 5px; margin-left: 4px; padding: 5px 12px; border-radius: 99px; border: none; background: #fef2f2; color: #b91c1c; font-size: 11px; font-weight: 600; cursor: pointer; transition: background .15s; &:hover { background: #fee2e2; } }
+
     /* Pagination */
     .pagination { display: flex; align-items: center; gap: 4px; padding: 14px 16px; border-top: 1px solid #f0f0f3; flex-wrap: wrap; }
     .pg-btn { min-width: 32px; height: 32px; padding: 0 8px; border-radius: 7px; border: 1px solid #e8e8ec; background: #fff; color: #555; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; &:hover:not(:disabled) { background: #f4f4f6; } &:disabled { opacity: .35; cursor: not-allowed; } &.pg-active { background: var(--color-brand); color: #fff; border-color: transparent; } }
@@ -380,12 +399,14 @@ const STATUS_LABEL: Record<string, string> = {
 export class OwnerListComponent implements OnInit {
   private svc    = inject(OwnerService);
   private router = inject(Router);
+  private route  = inject(ActivatedRoute);
   private http   = inject(HttpClient);
 
-  owners     = signal<OwnerListItemDto[]>([]);
-  loading    = signal(true);
-  error      = signal('');
-  search     = signal('');
+  owners       = signal<OwnerListItemDto[]>([]);
+  loading      = signal(true);
+  error        = signal('');
+  search       = signal('');
+  filterStatus = signal('');
   page       = signal(1);
   pageSize   = signal(10);
   total      = signal(0);
@@ -403,10 +424,13 @@ export class OwnerListComponent implements OnInit {
   };
 
   filtered = computed(() => {
-    const q = this.search().toLowerCase();
-    return this.owners().filter(o =>
-      !q || o.name.toLowerCase().includes(q) || o.email.toLowerCase().includes(q)
-    );
+    const q  = this.search().toLowerCase();
+    const st = this.filterStatus();
+    return this.owners().filter(o => {
+      const matchSearch = !q || o.name.toLowerCase().includes(q) || o.email.toLowerCase().includes(q);
+      const matchStatus = !st || o.status === st;
+      return matchSearch && matchStatus;
+    });
   });
 
   pageNumbers = computed(() => {
@@ -420,7 +444,11 @@ export class OwnerListComponent implements OnInit {
     return pages;
   });
 
-  ngOnInit() { this.load(); }
+  ngOnInit() {
+    const statusFromUrl = this.route.snapshot.queryParamMap.get('status');
+    if (statusFromUrl) this.filterStatus.set(statusFromUrl);
+    this.load();
+  }
 
   private load() {
     this.loading.set(true);

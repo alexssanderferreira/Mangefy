@@ -50,19 +50,27 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
         </button>
       </div>
 
+      <!-- Quick filter tabs -->
+      <div class="qtabs">
+        <button class="qtab" [class.active]="filterStatus() === ''"           (click)="filterStatus.set('')">Todos</button>
+        <button class="qtab" [class.active]="filterStatus() === 'Active'"      (click)="filterStatus.set('Active')">Ativos</button>
+        <button class="qtab" [class.active]="filterStatus() === 'TrialPeriod'" (click)="filterStatus.set('TrialPeriod')">Trial</button>
+        <button class="qtab" [class.active]="filterStatus() === 'Suspended'"   (click)="filterStatus.set('Suspended')">Suspensos</button>
+        <button class="qtab" [class.active]="filterStatus() === 'Cancelled'"   (click)="filterStatus.set('Cancelled')">Cancelados</button>
+        @if (search() || filterStatus()) {
+          <button class="qtab-clear" (click)="search.set(''); filterStatus.set('')">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Limpar filtros
+          </button>
+        }
+      </div>
+
       <!-- Filtros -->
       <div class="filters">
         <div class="search-wrap">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input class="search-input" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Buscar por nome ou slug..." />
         </div>
-        <select class="filter-select" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
-          <option value="">Todos os status</option>
-          <option value="Active">Ativo</option>
-          <option value="TrialPeriod">Trial</option>
-          <option value="Suspended">Suspenso</option>
-          <option value="Cancelled">Cancelado</option>
-        </select>
         <select class="filter-select" [ngModel]="pageSize()" (ngModelChange)="onPageSizeChange($event)">
           <option [ngValue]="10">10 por página</option>
           <option [ngValue]="25">25 por página</option>
@@ -328,6 +336,25 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
     }
     .page-title  { font-size: 20px; font-weight: 700; color: #111; }
     .page-subtitle { font-size: 12px; color: #aaa; margin-top: 2px; }
+
+    /* Quick filter tabs */
+    .qtabs {
+      display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-bottom: 10px;
+    }
+    .qtab {
+      padding: 5px 14px; border-radius: 99px; border: 1px solid #e8e8ec;
+      background: #fff; color: #666; font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: all .15s;
+      &:hover { background: #f5f5f7; border-color: #d0d0d8; color: #333; }
+      &.active { background: var(--color-brand); color: #fff; border-color: transparent; }
+    }
+    .qtab-clear {
+      display: inline-flex; align-items: center; gap: 5px; margin-left: 4px;
+      padding: 5px 12px; border-radius: 99px; border: none;
+      background: #fef2f2; color: #b91c1c; font-size: 11px; font-weight: 600; cursor: pointer;
+      transition: background .15s;
+      &:hover { background: #fee2e2; }
+    }
 
     /* Filtros */
     .filters { display: flex; gap: 10px; margin-bottom: 12px; }
@@ -683,6 +710,10 @@ export class TenantListComponent implements OnInit {
     this.plansSvc.getAll().subscribe(p => this.plans.set(p));
     this.http.get<BusinessTypeDto[]>(`${environment.apiUrl}/admin/business-types`)
       .subscribe(bt => this.businessTypes.set(bt));
+
+    // Filtro rápido via queryParam (ex: do dashboard)
+    const statusFromUrl = this.route.snapshot.queryParamMap.get('status');
+    if (statusFromUrl) this.filterStatus.set(statusFromUrl);
 
     // Atalho vindo de /admin/owners/:id → abre drawer de criação com owner pré-selecionado
     const ownerIdFromUrl = this.route.snapshot.queryParamMap.get('newWithOwner');
