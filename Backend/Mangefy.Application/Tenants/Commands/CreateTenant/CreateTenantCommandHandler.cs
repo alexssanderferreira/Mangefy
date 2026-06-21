@@ -107,7 +107,11 @@ public sealed class CreateTenantCommandHandler : IRequestHandler<CreateTenantCom
 
         await _tenants.AddAsync(tenant, cancellationToken);
 
-        // 1.1 Copiar RoleTemplates ativos do BusinessType para o novo Tenant
+        // 1.1 Cargo imutável do dono — sempre criado, independente do BusinessType
+        var ownerRole = TenantRole.CreateOwnerRole(tenant.Id);
+        await _roles.AddAsync(ownerRole, cancellationToken);
+
+        // 1.2 Copiar RoleTemplates ativos do BusinessType para o novo Tenant
         foreach (var template in businessType.GetActiveTemplates())
         {
             var role = TenantRole.CreateFromTemplate(

@@ -55,6 +55,27 @@ public sealed class TenantRole : AggregateRoot
     }
 
     /// <summary>
+    /// Cria o cargo imutável do dono do estabelecimento.
+    /// Sempre criado no onboarding; possui todas as permissões sem restrição de plano.
+    /// </summary>
+    public static TenantRole CreateOwnerRole(Guid tenantId)
+    {
+        if (tenantId == Guid.Empty)
+            throw new DomainException("TenantId inválido.");
+
+        return new TenantRole
+        {
+            TenantId = tenantId,
+            Name = "Dono",
+            Description = "Cargo imutável do proprietário do estabelecimento. Acesso irrestrito.",
+            IsOwnerRole = true,
+            IsFromTemplate = false,
+            TemplateId = null,
+            IsActive = true
+        };
+    }
+
+    /// <summary>
     /// Cria um cargo customizado pelo Owner (requer plano com MaxCustomRoles > 0).
     /// </summary>
     public static TenantRole Create(Guid tenantId, string name, string? description = null)
