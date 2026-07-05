@@ -25,13 +25,14 @@ public sealed class FeatureGracePeriod : AggregateRoot
         if (!FeatureCatalog.IsValid(featureKey))
             throw new DomainException($"Feature '{featureKey}' não existe no catálogo.");
 
-        if (gracePeriodDays <= 0)
-            throw new DomainException("Período de carência deve ser maior que zero.");
+        if (gracePeriodDays < 0)
+            throw new DomainException("Período de carência não pode ser negativo.");
 
         return new FeatureGracePeriod
         {
             TenantId = tenantId,
             FeatureKey = featureKey,
+            // gracePeriodDays = 0 → sem carência, acesso revogado imediatamente
             ExpiresAt = DateTime.UtcNow.AddDays(gracePeriodDays)
         };
     }

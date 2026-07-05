@@ -12,7 +12,7 @@ public sealed class UpdateMenuItemCommandValidator : AbstractValidator<UpdateMen
         RuleFor(x => x.CategoryId).NotEmpty();
         RuleFor(x => x.ItemId).NotEmpty();
         RuleFor(x => x.Name).NotEmpty().MaximumLength(150);
-        RuleFor(x => x.Price).GreaterThan(0);
+        RuleFor(x => x.Price).GreaterThanOrEqualTo(0);
         RuleFor(x => x.Station).Must(s => Enum.TryParse<MenuItemStation>(s, out _))
             .WithMessage("Estação inválida. Use Kitchen, Bar ou Custom.");
     }

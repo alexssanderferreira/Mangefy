@@ -134,10 +134,11 @@ public sealed class Menu : AggregateRoot
         string? description,
         decimal price,
         string? imageUrl = null,
-        bool requiresKds = true)
+        bool requiresKds = true,
+        MenuItemStation station = MenuItemStation.Kitchen)
     {
         var category = GetCategory(categoryId);
-        var item = category.AddItem(name, description, price, imageUrl, requiresKds);
+        var item = category.AddItem(name, description, price, imageUrl, requiresKds, station);
         SetUpdatedAt();
         return item;
     }

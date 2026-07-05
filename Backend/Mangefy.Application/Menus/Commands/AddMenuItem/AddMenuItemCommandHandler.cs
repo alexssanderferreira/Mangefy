@@ -49,7 +49,7 @@ public sealed class AddMenuItemCommandHandler : IRequestHandler<AddMenuItemComma
 
         var item = menu.AddItemToCategory(
             request.CategoryId, request.Name, request.Description,
-            request.Price, request.ImageUrl, request.RequiresKds);
+            request.Price, request.ImageUrl, request.RequiresKds, request.Station);
 
         await _menus.UpdateAsync(menu, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);

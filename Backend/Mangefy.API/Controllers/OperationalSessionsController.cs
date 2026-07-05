@@ -26,6 +26,7 @@ public sealed class OperationalSessionsController : ControllerBase
         => Ok(await _sender.Send(new GetActiveSessionsQuery(tenantId), ct));
 
     [HttpPost("start")]
+    [RequirePermission(PermissionCatalog.Sessions.Manage)]
     public async Task<IActionResult> Start(
         Guid tenantId,
         [FromBody] StartSessionRequest request,
@@ -38,6 +39,7 @@ public sealed class OperationalSessionsController : ControllerBase
     }
 
     [HttpPost("{id:guid}/end")]
+    [RequirePermission(PermissionCatalog.Sessions.Manage)]
     public async Task<IActionResult> End(Guid tenantId, Guid id, CancellationToken ct)
     {
         await _sender.Send(new EndSessionCommand(tenantId, id), ct);

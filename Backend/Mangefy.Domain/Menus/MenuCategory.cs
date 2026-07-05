@@ -58,9 +58,10 @@ public sealed class MenuCategory : Entity
         string? description,
         decimal price,
         string? imageUrl,
-        bool requiresKds)
+        bool requiresKds,
+        MenuItemStation station = MenuItemStation.Kitchen)
     {
-        var item = MenuItem.Create(TenantId, Id, name, description, price, imageUrl, requiresKds);
+        var item = MenuItem.Create(TenantId, Id, name, description, price, imageUrl, requiresKds, station);
         _items.Add(item);
         SetUpdatedAt();
         return item;

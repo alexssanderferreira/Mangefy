@@ -91,6 +91,12 @@ public static class PermissionCatalog
         public const string Manage = "settings.manage";
     }
 
+    public static class Sessions
+    {
+        /// <summary>Iniciar e encerrar sessão operacional (ponto eletrônico).</summary>
+        public const string Manage = "sessions.manage";
+    }
+
     /// <summary>
     /// Todas as permissões disponíveis na plataforma.
     /// </summary>
@@ -108,7 +114,8 @@ public static class PermissionCatalog
         Employees.Read, Employees.Manage,
         Roles.Read, Roles.Manage,
         Reports.Read,
-        Settings.Manage
+        Settings.Manage,
+        Sessions.Manage
     };
 
     public static bool IsValid(string permission) => All.Contains(permission);

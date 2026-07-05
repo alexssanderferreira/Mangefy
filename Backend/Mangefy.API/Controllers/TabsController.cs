@@ -139,10 +139,7 @@ public sealed record OpenTabRequest(
 
 public sealed record SubmitOrderItemRequest(
     Guid MenuItemId,
-    string ItemName,
-    decimal UnitPrice,
     int Quantity,
-    bool RequiresKds,
     string? Notes = null,
     IReadOnlyList<string>? Modifiers = null);
 

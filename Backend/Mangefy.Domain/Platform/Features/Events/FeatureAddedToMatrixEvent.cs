@@ -5,7 +5,7 @@ namespace Mangefy.Domain.Platform.Features.Events;
 /// <summary>
 /// Disparado quando o AdminSaas adiciona uma feature a uma combinação Plano × Tipo de Negócio.
 /// Efeito imediato — tenants existentes ganham acesso sem carência.
-/// </thinking>
+/// </summary>
 public sealed class FeatureAddedToMatrixEvent(
     Guid planFeatureSetId,
     Guid planId,
