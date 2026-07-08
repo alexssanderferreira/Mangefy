@@ -5,27 +5,32 @@ import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { SupplierService, PlatformSupplierDto, SupplierCategoryDto } from './supplier.service';
 import { ToastService } from '../../../core/toast/toast.service';
+import { LucideAngularModule, ChevronLeft, Phone, MapPin, Trash2 } from 'lucide-angular';
 
 type Tab = 'info' | 'edit';
 
 @Component({
   selector: 'app-supplier-detail',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, LucideAngularModule],
   template: `
     <div class="page">
 
       <!-- Breadcrumb -->
       <div class="breadcrumb">
         <button class="back-btn" (click)="goBack()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          <lucide-icon [img]="ChevronLeft" [size]="14" [strokeWidth]="2"></lucide-icon>
           Fornecedores
         </button>
         @if (supplier()) { <span class="sep">/</span> <span class="bc-current">{{ supplier()!.name }}</span> }
       </div>
 
+      @if (error()) {
+        <div class="alert-error">{{ error() }}</div>
+      }
+
       @if (loading()) {
-        <div class="loading-state"><div class="spin"></div></div>
+        <div class="loading-state"><div class="spinner"></div></div>
       } @else if (!supplier()) {
         <div class="empty-state">Fornecedor não encontrado.</div>
       } @else {
@@ -40,7 +45,7 @@ type Tab = 'info' | 'edit';
             </div>
           </div>
           <div class="header-actions">
-            <span class="badge" [class.badge-active]="supplier()!.isActive" [class.badge-inactive]="!supplier()!.isActive">
+            <span class="badge" [class.badge-success]="supplier()!.isActive" [class.badge-neutral]="!supplier()!.isActive">
               {{ supplier()!.isActive ? 'Ativo' : 'Inativo' }}
             </span>
             @if (supplier()!.isActive) {
@@ -124,13 +129,13 @@ type Tab = 'info' | 'edit';
               <div class="form-row">
                 <div class="field field--full">
                   <label class="field-label">Nome <span class="required">*</span></label>
-                  <input class="field-input" [(ngModel)]="editForm.name" placeholder="Nome do fornecedor" />
+                  <input class="input" [(ngModel)]="editForm.name" placeholder="Nome do fornecedor" />
                 </div>
               </div>
               <div class="form-row">
                 <div class="field">
                   <label class="field-label">Categoria <span class="required">*</span></label>
-                  <select class="field-input field-select" [(ngModel)]="editForm.supplierCategoryId">
+                  <select class="input field-select" [(ngModel)]="editForm.supplierCategoryId">
                     @for (c of categories(); track c.id) {
                       <option [value]="c.id">{{ c.name }}</option>
                     }
@@ -138,85 +143,85 @@ type Tab = 'info' | 'edit';
                 </div>
                 <div class="field">
                   <label class="field-label">CNPJ</label>
-                  <input class="field-input" [(ngModel)]="editForm.cnpj" placeholder="00.000.000/0000-00" />
+                  <input class="input" [(ngModel)]="editForm.cnpj" placeholder="00.000.000/0000-00" />
                 </div>
               </div>
               <div class="form-row">
                 <div class="field field--full">
                   <label class="field-label">Descrição</label>
-                  <textarea class="field-input field-textarea" [(ngModel)]="editForm.description" rows="3" placeholder="Descrição opcional..."></textarea>
+                  <textarea class="input field-textarea" [(ngModel)]="editForm.description" rows="3" placeholder="Descrição opcional..."></textarea>
                 </div>
               </div>
               <div class="form-row">
                 <div class="field field--full">
                   <label class="field-label">Horário de Atendimento</label>
-                  <input class="field-input" [(ngModel)]="editForm.businessHours" placeholder="ex: Seg–Sex 08h–18h" />
+                  <input class="input" [(ngModel)]="editForm.businessHours" placeholder="ex: Seg–Sex 08h–18h" />
                 </div>
               </div>
             </div>
 
             <div class="form-section">
               <div class="section-label">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.56a16 16 0 0 0 5.82 5.82l1.63-1.64a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <lucide-icon [img]="Phone" [size]="13" [strokeWidth]="2"></lucide-icon>
                 Contato
               </div>
               <div class="form-row">
                 <div class="field">
                   <label class="field-label">E-mail</label>
-                  <input class="field-input" type="email" [(ngModel)]="editForm.email" />
+                  <input class="input" type="email" [(ngModel)]="editForm.email" />
                 </div>
                 <div class="field">
                   <label class="field-label">Telefone</label>
-                  <input class="field-input" [(ngModel)]="editForm.phone" placeholder="+55 41 99999-9999" />
+                  <input class="input" [(ngModel)]="editForm.phone" placeholder="+55 41 99999-9999" />
                 </div>
               </div>
               <div class="form-row">
                 <div class="field field--full">
                   <label class="field-label">Website</label>
-                  <input class="field-input" [(ngModel)]="editForm.website" placeholder="https://..." />
+                  <input class="input" [(ngModel)]="editForm.website" placeholder="https://..." />
                 </div>
               </div>
             </div>
 
             <div class="form-section">
               <div class="section-label">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <lucide-icon [img]="MapPin" [size]="13" [strokeWidth]="2"></lucide-icon>
                 Endereço
               </div>
               <div class="form-row">
                 <div class="field">
                   <label class="field-label">CEP</label>
-                  <input class="field-input" [(ngModel)]="editForm.cep" placeholder="00000-000" (blur)="lookupCep()" />
+                  <input class="input" [(ngModel)]="editForm.cep" placeholder="00000-000" (blur)="lookupCep()" />
                 </div>
                 <div class="field">
                   <label class="field-label">Número</label>
-                  <input class="field-input" [(ngModel)]="editForm.numero" />
+                  <input class="input" [(ngModel)]="editForm.numero" />
                 </div>
               </div>
               <div class="form-row">
                 <div class="field field--full">
                   <label class="field-label">Logradouro</label>
-                  <input class="field-input" [(ngModel)]="editForm.logradouro" />
+                  <input class="input" [(ngModel)]="editForm.logradouro" />
                 </div>
               </div>
               <div class="form-row">
                 <div class="field">
                   <label class="field-label">Bairro</label>
-                  <input class="field-input" [(ngModel)]="editForm.bairro" />
+                  <input class="input" [(ngModel)]="editForm.bairro" />
                 </div>
                 <div class="field">
                   <label class="field-label">Cidade</label>
-                  <input class="field-input" [(ngModel)]="editForm.cidade" />
+                  <input class="input" [(ngModel)]="editForm.cidade" />
                 </div>
                 <div class="field field--sm">
                   <label class="field-label">UF</label>
-                  <input class="field-input" [(ngModel)]="editForm.uf" maxlength="2" style="text-transform:uppercase" />
+                  <input class="input" [(ngModel)]="editForm.uf" maxlength="2" style="text-transform:uppercase" />
                 </div>
               </div>
               <div class="form-row">
                 <div class="field field--full">
                   <label class="field-label">Complemento</label>
-                  <input class="field-input" [(ngModel)]="editForm.complemento" />
+                  <input class="input" [(ngModel)]="editForm.complemento" />
                 </div>
               </div>
             </div>
@@ -239,7 +244,7 @@ type Tab = 'info' | 'edit';
       <div class="modal-overlay" (click)="deleteModal.set(false)">
         <div class="modal" (click)="$event.stopPropagation()">
           <div class="modal-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            <lucide-icon [img]="Trash2" [size]="24" [strokeWidth]="2"></lucide-icon>
           </div>
           <h3 class="modal-title">Excluir fornecedor</h3>
           <p class="modal-body">Tem certeza que quer excluir <strong>{{ supplier()?.name }}</strong>?<br>Esta ação não pode ser desfeita.</p>
@@ -283,17 +288,6 @@ type Tab = 'info' | 'edit';
     .detail-desc { font-size: 13px; color: #888; margin-top: 2px; }
     .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
-    /* Tabs */
-    .tabs { display: flex; border-bottom: 2px solid #f0f0f3; margin-bottom: 20px; }
-    .tab {
-      display: flex; align-items: center; gap: 6px;
-      padding: 10px 18px; border: none; background: none;
-      font-size: 13px; font-weight: 600; color: #aaa; cursor: pointer;
-      border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s;
-      &:hover { color: #555; }
-      &.active { color: var(--color-brand); border-bottom-color: var(--color-brand); }
-    }
-
     /* Cards */
     .cards-row { display: flex; flex-direction: column; gap: 12px; }
     .card { background: #fff; border: 1px solid #e8e8ec; border-radius: 14px; padding: 20px; }
@@ -319,18 +313,12 @@ type Tab = 'info' | 'edit';
       display: flex; align-items: center; gap: 6px;
       font-size: 11px; font-weight: 700; text-transform: uppercase;
       letter-spacing: .06em; color: #aaa; margin-bottom: 4px;
-      svg { color: var(--color-brand); }
+      svg, lucide-icon { color: var(--color-brand); }
     }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .field { display: flex; flex-direction: column; gap: 5px; &.field--full { grid-column: 1 / -1; } &.field--sm { max-width: 80px; } }
     .field-label { font-size: 12px; font-weight: 600; color: #555; }
     .required { color: var(--color-brand); }
-    .field-input {
-      padding: 9px 12px; border: 1px solid #e8e8ec; border-radius: 8px;
-      font-size: 13px; color: #111; outline: none; transition: border-color .15s;
-      background: #fff; width: 100%; box-sizing: border-box; font-family: inherit;
-      &:focus { border-color: var(--color-brand); }
-    }
     .field-textarea { resize: vertical; min-height: 80px; }
     .field-select {
       appearance: none;
@@ -338,61 +326,6 @@ type Tab = 'info' | 'edit';
       background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer;
     }
     .edit-actions { display: flex; gap: 8px; padding: 16px 20px; }
-
-    /* Badges */
-    .badge {
-      display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700;
-      &-active   { background: #dcfce7; color: #15803d; }
-      &-inactive { background: #f4f4f5; color: #71717a; }
-    }
-
-    /* Buttons */
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 16px; border-radius: 8px;
-      font-size: 13px; font-weight: 600; cursor: pointer;
-      border: 1px solid transparent; transition: all .15s;
-      &:disabled { opacity: .5; cursor: not-allowed; }
-    }
-    .btn-primary        { background: var(--color-brand); color: #fff; &:hover { opacity: .9; } }
-    .btn-ghost          { background: #f4f4f5; color: #555; border-color: #e8e8ec; &:hover { background: #ebebef; } }
-    .btn-warn           { background: #fffbeb; color: #b45309; border-color: #fde68a; &:hover { background: #fef3c7; } }
-    .btn-success        { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; &:hover { background: #dcfce7; } }
-    .btn-danger-outline { background: #fef2f2; color: #b91c1c; border-color: #fecaca; &:hover { background: #fee2e2; } }
-    .btn-danger         { background: #dc2626; color: #fff; &:hover { background: #b91c1c; } }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200;
-      display: flex; align-items: center; justify-content: center;
-      backdrop-filter: blur(3px);
-    }
-    .modal {
-      background: #fff; border-radius: 16px; padding: 32px 28px 24px;
-      width: 100%; max-width: 400px;
-      display: flex; flex-direction: column; align-items: center; gap: 12px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.2);
-      animation: scaleIn .15s ease;
-    }
-    @keyframes scaleIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .modal-icon {
-      width: 48px; height: 48px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      background: #fef2f2; color: #b91c1c;
-    }
-    .modal-title { font-size: 17px; font-weight: 700; color: #111; }
-    .modal-body  { font-size: 14px; color: #666; text-align: center; line-height: 1.6; strong { color: #111; } }
-    .modal-actions { display: flex; gap: 10px; width: 100%; margin-top: 8px; button { flex: 1; justify-content: center; } }
-
-    /* Loading / empty */
-    .loading-state { display: flex; justify-content: center; padding: 60px; }
-    .spin {
-      width: 32px; height: 32px; border-radius: 50%;
-      border: 3px solid #f0f0f3; border-top-color: var(--color-brand);
-      animation: spin .7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .empty-state { text-align: center; padding: 60px; color: #ccc; }
 
     @media (max-width: 768px) {
       .page { padding: 14px; max-width: 100%; }
@@ -408,9 +341,15 @@ export class SupplierDetailComponent implements OnInit {
   private svc    = inject(SupplierService);
   private toast  = inject(ToastService);
 
+  readonly ChevronLeft = ChevronLeft;
+  readonly Phone = Phone;
+  readonly MapPin = MapPin;
+  readonly Trash2 = Trash2;
+
   supplier   = signal<PlatformSupplierDto | null>(null);
   categories = signal<SupplierCategoryDto[]>([]);
   loading    = signal(true);
+  error      = signal('');
   saving     = signal(false);
   acting     = signal('');
   activeTab  = signal<Tab>('info');
@@ -431,7 +370,7 @@ export class SupplierDetailComponent implements OnInit {
         this.categories.set(categories);
         this.loading.set(false);
       },
-      error: () => { this.loading.set(false); this.toast.error('Erro ao carregar fornecedor.'); },
+      error: () => { this.loading.set(false); this.error.set('Não foi possível carregar o fornecedor.'); },
     });
   }
 

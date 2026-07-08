@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { LucideAngularModule, Plus, ShoppingCart, Search, SquarePen, Ban, CircleCheckBig, Trash2, Folder, X, User, Phone, MapPin, Clock, List, LoaderCircle } from 'lucide-angular';
 import { ToastService } from '../../../core/toast/toast.service';
 import { SupplierService, PlatformSupplierDto, SupplierCategoryDto } from './supplier.service';
 
@@ -11,7 +12,7 @@ type Tab = 'suppliers' | 'categories';
 @Component({
   selector: 'app-suppliers',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, LucideAngularModule],
   template: `
     <div class="page">
 
@@ -21,19 +22,19 @@ type Tab = 'suppliers' | 'categories';
           <h1 class="page-title">Fornecedores</h1>
           <p class="page-subtitle">Catálogo global de fornecedores da plataforma</p>
         </div>
-        <button class="btn-primary" (click)="openCreate()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <button class="btn btn-primary" (click)="openCreate()">
+          <lucide-icon [img]="Plus" [size]="14" [strokeWidth]="2.5"></lucide-icon>
           @if (tab() === 'suppliers') { Novo Fornecedor } @else { Nova Categoria }
         </button>
       </div>
 
       <!-- Tabs -->
       <div class="tabs">
-        <button class="tab-btn" [class.active]="tab() === 'suppliers'" (click)="tab.set('suppliers')">
+        <button class="tab" [class.active]="tab() === 'suppliers'" (click)="tab.set('suppliers')">
           Fornecedores
           <span class="tab-count">{{ suppliers().length }}</span>
         </button>
-        <button class="tab-btn" [class.active]="tab() === 'categories'" (click)="tab.set('categories')">
+        <button class="tab" [class.active]="tab() === 'categories'" (click)="tab.set('categories')">
           Categorias
           <span class="tab-count">{{ categories().length }}</span>
         </button>
@@ -41,22 +42,22 @@ type Tab = 'suppliers' | 'categories';
 
       <!-- Loading -->
       @if (loading()) {
-        <div class="skel-rows">@for (i of [1,2,3,4,5]; track i) { <div class="skel-row"></div> }</div>
+        <div class="skel-rows">@for (i of [1,2,3,4,5]; track i) { <div class="skeleton-row" style="height:52px"></div> }</div>
       }
 
       <!-- Suppliers tab -->
       @if (!loading() && tab() === 'suppliers') {
         @if (suppliers().length === 0) {
           <div class="empty-state">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-8 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+            <lucide-icon [img]="ShoppingCart" [size]="40" [strokeWidth]="1.5"></lucide-icon>
             <p>Nenhum fornecedor cadastrado</p>
-            <button class="btn-primary" (click)="openCreate()">Cadastrar fornecedor</button>
+            <button class="btn btn-primary" (click)="openCreate()">Cadastrar fornecedor</button>
           </div>
         } @else {
           <!-- Filter bar -->
           <div class="filter-bar">
             <div class="search-wrap">
-              <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <lucide-icon [img]="Search" [size]="14" [strokeWidth]="2" class="search-icon"></lucide-icon>
               <input class="search-input" type="text" placeholder="Buscar fornecedor..." [value]="search()" (input)="search.set($any($event.target).value)" />
             </div>
             <select class="filter-select" [value]="filterCat()" (change)="filterCat.set($any($event.target).value)">
@@ -104,24 +105,24 @@ type Tab = 'suppliers' | 'categories';
                       </div>
                     </td>
                     <td>
-                      <span class="badge" [class.badge-active]="s.isActive" [class.badge-inactive]="!s.isActive">
+                      <span class="badge" [class.badge-success]="s.isActive" [class.badge-neutral]="!s.isActive">
                         {{ s.isActive ? 'Ativo' : 'Inativo' }}
                       </span>
                     </td>
                     <td class="action-col" (click)="$event.stopPropagation()">
                       <div class="row-actions">
                         <button class="btn-icon" title="Editar" (click)="openEdit(s)">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                          <lucide-icon [img]="SquarePen" [size]="14" [strokeWidth]="2"></lucide-icon>
                         </button>
                         <button class="btn-icon" [title]="s.isActive ? 'Desativar' : 'Ativar'" (click)="toggleSupplier(s)">
                           @if (s.isActive) {
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                            <lucide-icon [img]="Ban" [size]="14" [strokeWidth]="2"></lucide-icon>
                           } @else {
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <lucide-icon [img]="CircleCheckBig" [size]="14" [strokeWidth]="2"></lucide-icon>
                           }
                         </button>
                         <button class="btn-icon btn-icon--danger" title="Excluir" (click)="deleteModal.set(s)">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                          <lucide-icon [img]="Trash2" [size]="14" [strokeWidth]="2"></lucide-icon>
                         </button>
                       </div>
                     </td>
@@ -137,9 +138,9 @@ type Tab = 'suppliers' | 'categories';
       @if (!loading() && tab() === 'categories') {
         @if (categories().length === 0) {
           <div class="empty-state">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <lucide-icon [img]="Folder" [size]="40" [strokeWidth]="1.5"></lucide-icon>
             <p>Nenhuma categoria cadastrada</p>
-            <button class="btn-primary" (click)="openCreate()">Criar categoria</button>
+            <button class="btn btn-primary" (click)="openCreate()">Criar categoria</button>
           </div>
         } @else {
           <div class="cards-grid">
@@ -147,7 +148,7 @@ type Tab = 'suppliers' | 'categories';
               <div class="cat-card" [class.cat-inactive]="!c.isActive">
                 <div class="cat-header">
                   <div class="cat-avatar">{{ c.name[0] }}</div>
-                  <span class="badge" [class.badge-active]="c.isActive" [class.badge-inactive]="!c.isActive">
+                  <span class="badge" [class.badge-success]="c.isActive" [class.badge-neutral]="!c.isActive">
                     {{ c.isActive ? 'Ativa' : 'Inativa' }}
                   </span>
                 </div>
@@ -158,17 +159,17 @@ type Tab = 'suppliers' | 'categories';
                 </div>
                 <div class="cat-actions">
                   <button class="btn-icon" (click)="openEditCategory(c)">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <lucide-icon [img]="SquarePen" [size]="13" [strokeWidth]="2"></lucide-icon>
                   </button>
                   <button class="btn-icon" [title]="c.isActive ? 'Desativar' : 'Ativar'" (click)="toggleCategory(c)">
                     @if (c.isActive) {
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                      <lucide-icon [img]="Ban" [size]="13" [strokeWidth]="2"></lucide-icon>
                     } @else {
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                      <lucide-icon [img]="CircleCheckBig" [size]="13" [strokeWidth]="2"></lucide-icon>
                     }
                   </button>
                   <button class="btn-icon btn-icon--danger" (click)="deleteCatModal.set(c)" [disabled]="supplierCountByCategory(c.id) > 0" [title]="supplierCountByCategory(c.id) > 0 ? 'Categoria em uso' : 'Excluir'">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                    <lucide-icon [img]="Trash2" [size]="13" [strokeWidth]="2"></lucide-icon>
                   </button>
                 </div>
               </div>
@@ -181,12 +182,12 @@ type Tab = 'suppliers' | 'categories';
 
     <!-- ── Drawer Fornecedor ──────────────────────────────────────────────── -->
     @if (drawer()) {
-      <div class="overlay" (click)="closeDrawer()"></div>
+      <div class="drawer-overlay" (click)="closeDrawer()"></div>
       <aside class="drawer">
         <div class="drawer-header">
           <div class="drawer-header-left">
             <div class="drawer-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-8 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+              <lucide-icon [img]="ShoppingCart" [size]="16" [strokeWidth]="2"></lucide-icon>
             </div>
             <div>
               <h2 class="drawer-title">{{ editingSupplier() ? 'Editar Fornecedor' : 'Novo Fornecedor' }}</h2>
@@ -194,14 +195,14 @@ type Tab = 'suppliers' | 'categories';
             </div>
           </div>
           <button class="btn-close" (click)="closeDrawer()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <lucide-icon [img]="X" [size]="16" [strokeWidth]="2.5"></lucide-icon>
           </button>
         </div>
         <form class="drawer-body" [formGroup]="supplierForm" (ngSubmit)="saveSupplier()">
 
           <div class="form-section">
             <div class="form-section-header">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <lucide-icon [img]="User" [size]="12" [strokeWidth]="2.5"></lucide-icon>
               Identificação
             </div>
             <div class="field">
@@ -221,7 +222,7 @@ type Tab = 'suppliers' | 'categories';
 
           <div class="form-section">
             <div class="form-section-header">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <lucide-icon [img]="Phone" [size]="12" [strokeWidth]="2.5"></lucide-icon>
               Contato
             </div>
             <div class="field-row">
@@ -246,7 +247,7 @@ type Tab = 'suppliers' | 'categories';
 
           <div class="form-section">
             <div class="form-section-header">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <lucide-icon [img]="MapPin" [size]="12" [strokeWidth]="2.5"></lucide-icon>
               Endereço
             </div>
             <div class="field-row-cep">
@@ -256,7 +257,7 @@ type Tab = 'suppliers' | 'categories';
                   <input class="field-ctrl" formControlName="cep" placeholder="00000-000" maxlength="9"
                     (blur)="lookupCep()" (keydown.enter)="$event.preventDefault(); lookupCep()" />
                   @if (cepLoading()) {
-                    <svg class="input-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    <lucide-icon [img]="LoaderCircle" [size]="14" [strokeWidth]="2.5" class="input-spin"></lucide-icon>
                   }
                 </div>
               </div>
@@ -293,7 +294,7 @@ type Tab = 'suppliers' | 'categories';
 
           <div class="form-section">
             <div class="form-section-header">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <lucide-icon [img]="Clock" [size]="12" [strokeWidth]="2.5"></lucide-icon>
               Horário de Funcionamento
             </div>
             <div class="field">
@@ -304,7 +305,7 @@ type Tab = 'suppliers' | 'categories';
 
           <div class="form-section">
             <div class="form-section-header">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              <lucide-icon [img]="List" [size]="12" [strokeWidth]="2.5"></lucide-icon>
               Observações
             </div>
             <div class="field">
@@ -314,10 +315,10 @@ type Tab = 'suppliers' | 'categories';
           </div>
 
           <div class="drawer-footer">
-            <button type="button" class="btn-ghost" (click)="closeDrawer()">Cancelar</button>
-            <button type="submit" class="btn-primary" [disabled]="supplierForm.invalid || saving()">
+            <button type="button" class="btn btn-ghost" (click)="closeDrawer()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="supplierForm.invalid || saving()">
               @if (saving()) {
-                <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <lucide-icon [img]="LoaderCircle" [size]="14" [strokeWidth]="2.5" class="icon-spin"></lucide-icon>
                 Salvando...
               } @else { Salvar }
             </button>
@@ -328,12 +329,12 @@ type Tab = 'suppliers' | 'categories';
 
     <!-- ── Drawer Categoria ───────────────────────────────────────────────── -->
     @if (catDrawer()) {
-      <div class="overlay" (click)="closeCatDrawer()"></div>
+      <div class="drawer-overlay" (click)="closeCatDrawer()"></div>
       <aside class="drawer">
         <div class="drawer-header">
           <div class="drawer-header-left">
             <div class="drawer-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              <lucide-icon [img]="Folder" [size]="16" [strokeWidth]="2"></lucide-icon>
             </div>
             <div>
               <h2 class="drawer-title">{{ editingCategory() ? 'Editar Categoria' : 'Nova Categoria' }}</h2>
@@ -341,13 +342,13 @@ type Tab = 'suppliers' | 'categories';
             </div>
           </div>
           <button class="btn-close" (click)="closeCatDrawer()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <lucide-icon [img]="X" [size]="16" [strokeWidth]="2.5"></lucide-icon>
           </button>
         </div>
         <form class="drawer-body" [formGroup]="catForm" (ngSubmit)="saveCategory()">
           <div class="form-section">
             <div class="form-section-header">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              <lucide-icon [img]="Folder" [size]="12" [strokeWidth]="2.5"></lucide-icon>
               Dados
             </div>
             <div class="field">
@@ -360,10 +361,10 @@ type Tab = 'suppliers' | 'categories';
             </div>
           </div>
           <div class="drawer-footer">
-            <button type="button" class="btn-ghost" (click)="closeCatDrawer()">Cancelar</button>
-            <button type="submit" class="btn-primary" [disabled]="catForm.invalid || saving()">
+            <button type="button" class="btn btn-ghost" (click)="closeCatDrawer()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="catForm.invalid || saving()">
               @if (saving()) {
-                <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <lucide-icon [img]="LoaderCircle" [size]="14" [strokeWidth]="2.5" class="icon-spin"></lucide-icon>
                 Salvando...
               } @else { Salvar }
             </button>
@@ -374,13 +375,16 @@ type Tab = 'suppliers' | 'categories';
 
     <!-- ── Modal excluir fornecedor ──────────────────────────────────────── -->
     @if (deleteModal()) {
-      <div class="modal-backdrop" (click)="deleteModal.set(null)">
+      <div class="modal-overlay" (click)="deleteModal.set(null)">
         <div class="modal" (click)="$event.stopPropagation()">
-          <h3>Excluir fornecedor?</h3>
-          <p>O fornecedor <strong>{{ deleteModal()!.name }}</strong> será removido permanentemente.</p>
+          <div class="modal-icon">
+            <lucide-icon [img]="Trash2" [size]="24" [strokeWidth]="2"></lucide-icon>
+          </div>
+          <h3 class="modal-title">Excluir fornecedor?</h3>
+          <p class="modal-body">O fornecedor <strong>{{ deleteModal()!.name }}</strong> será removido permanentemente.</p>
           <div class="modal-actions">
-            <button class="btn-ghost" (click)="deleteModal.set(null)">Cancelar</button>
-            <button class="btn-danger" (click)="doDeleteSupplier()" [disabled]="saving()">
+            <button class="btn btn-ghost" (click)="deleteModal.set(null)">Cancelar</button>
+            <button class="btn btn-danger" (click)="doDeleteSupplier()" [disabled]="saving()">
               @if (saving()) { Excluindo... } @else { Excluir }
             </button>
           </div>
@@ -390,13 +394,16 @@ type Tab = 'suppliers' | 'categories';
 
     <!-- ── Modal excluir categoria ───────────────────────────────────────── -->
     @if (deleteCatModal()) {
-      <div class="modal-backdrop" (click)="deleteCatModal.set(null)">
+      <div class="modal-overlay" (click)="deleteCatModal.set(null)">
         <div class="modal" (click)="$event.stopPropagation()">
-          <h3>Excluir categoria?</h3>
-          <p>A categoria <strong>{{ deleteCatModal()!.name }}</strong> será removida permanentemente.</p>
+          <div class="modal-icon">
+            <lucide-icon [img]="Trash2" [size]="24" [strokeWidth]="2"></lucide-icon>
+          </div>
+          <h3 class="modal-title">Excluir categoria?</h3>
+          <p class="modal-body">A categoria <strong>{{ deleteCatModal()!.name }}</strong> será removida permanentemente.</p>
           <div class="modal-actions">
-            <button class="btn-ghost" (click)="deleteCatModal.set(null)">Cancelar</button>
-            <button class="btn-danger" (click)="doDeleteCategory()" [disabled]="saving()">
+            <button class="btn btn-ghost" (click)="deleteCatModal.set(null)">Cancelar</button>
+            <button class="btn btn-danger" (click)="doDeleteCategory()" [disabled]="saving()">
               @if (saving()) { Excluindo... } @else { Excluir }
             </button>
           </div>
@@ -408,24 +415,7 @@ type Tab = 'suppliers' | 'categories';
     .page { padding: 24px 28px; }
 
     .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 16px; }
-    .page-title  { font-size: 22px; font-weight: 700; color: #111; }
     .page-subtitle { font-size: 12px; color: #aaa; margin-top: 2px; }
-
-    /* Tabs */
-    .tabs { display: flex; gap: 4px; border-bottom: 2px solid #f0f0f3; margin-bottom: 20px; }
-    .tab-btn {
-      display: flex; align-items: center; gap: 6px;
-      padding: 10px 16px; background: none; border: none;
-      font-size: 13px; font-weight: 600; color: #888; cursor: pointer;
-      border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s;
-      &:hover { color: #333; }
-      &.active { color: var(--color-brand); border-bottom-color: var(--color-brand); }
-    }
-    .tab-count {
-      font-size: 11px; font-weight: 700; padding: 1px 6px;
-      border-radius: 99px; background: #f0f0f3; color: #777;
-    }
-    .tab-btn.active .tab-count { background: color-mix(in srgb, var(--color-brand) 12%, transparent); color: var(--color-brand); }
 
     /* Filter bar */
     .filter-bar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -470,11 +460,6 @@ type Tab = 'suppliers' | 'categories';
     .action-col { width: 120px; }
     .row-actions { display: flex; gap: 4px; justify-content: flex-end; }
 
-    /* Badges */
-    .badge { display: inline-flex; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
-    .badge-active   { background: #dcfce7; color: #15803d; }
-    .badge-inactive { background: #f4f4f5; color: #71717a; }
-
     /* Categories grid */
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
     .cat-card {
@@ -494,67 +479,9 @@ type Tab = 'suppliers' | 'categories';
     .cat-meta  { font-size: 11px; color: #bbb; margin-bottom: 12px; }
     .cat-actions { display: flex; gap: 6px; justify-content: flex-end; }
 
-    /* Buttons */
-    .btn-primary {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 9px 16px; background: #0a0a0a; color: #fff;
-      border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
-      font-family: inherit; cursor: pointer; transition: background .15s;
-      &:hover { background: #222; }
-      &:disabled { opacity: .5; cursor: not-allowed; }
-    }
-    .btn-ghost {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 9px 16px; background: #fff; color: #555;
-      border: 1.5px solid #e8e8ec; border-radius: 8px; font-size: 13px; font-weight: 600;
-      font-family: inherit; cursor: pointer; transition: all .15s;
-      &:hover { border-color: #bbb; }
-    }
-    .btn-danger {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 9px 16px; background: #dc2626; color: #fff;
-      border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
-      font-family: inherit; cursor: pointer;
-      &:disabled { opacity: .5; cursor: not-allowed; }
-    }
-    .btn-icon {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 28px; height: 28px; border-radius: 6px;
-      border: none; background: none; color: #aaa; cursor: pointer;
-      transition: background .1s, color .1s;
-      &:hover { background: #f0f0f3; color: #555; }
-      &.btn-icon--danger:hover { background: #fef2f2; color: #dc2626; }
-      &:disabled { opacity: .4; cursor: not-allowed; }
-    }
-    .btn-close {
-      display: flex; align-items: center; justify-content: center;
-      width: 30px; height: 30px; border-radius: 7px;
-      border: none; background: none; color: #aaa; cursor: pointer;
-      &:hover { background: #f0f0f3; color: #555; }
-    }
-
-    /* Drawer */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 40; backdrop-filter: blur(2px); }
-    .drawer {
-      position: fixed; top: 0; right: 0; bottom: 0; width: 440px;
-      background: #fff; z-index: 50; display: flex; flex-direction: column;
-      box-shadow: -8px 0 32px rgba(0,0,0,.12);
-      animation: slideIn .2s ease;
-      @media (max-width: 480px) { width: 100%; }
-    }
-    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-    .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #f0f0f3; }
-    .drawer-header-left { display: flex; align-items: center; gap: 12px; }
-    .drawer-icon { width: 36px; height: 36px; border-radius: 10px; background: color-mix(in srgb, var(--color-brand) 10%, transparent); color: var(--color-brand); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .drawer-title { font-size: 15px; font-weight: 700; color: #111; }
-    .drawer-subtitle { font-size: 11px; color: #aaa; margin-top: 1px; }
-    .btn-close { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid #e8e8ec; background: #fff; border-radius: 7px; cursor: pointer; color: #888; transition: all .15s; &:hover { background: #f4f4f5; color: #333; } }
-    .drawer-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
-    .drawer-footer { display: flex; gap: 8px; justify-content: flex-end; padding: 14px 20px; border-top: 1px solid #f0f0f3; background: #fafafa; flex-shrink: 0; }
-
     /* Form sections */
     .form-section { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: #fafafa; border: 1px solid #f0f0f3; border-radius: 10px; }
-    .form-section-header { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #999; svg { color: var(--color-brand); } }
+    .form-section-header { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #999; lucide-icon { color: var(--color-brand); } }
 
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -572,40 +499,17 @@ type Tab = 'suppliers' | 'categories';
     .field-row-cep { display: grid; grid-template-columns: 1fr 64px; gap: 10px; }
     .input-wrap { position: relative; }
     .input-wrap .field-ctrl { padding-right: 32px; }
-    .input-spin { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); color: #aaa; animation: spinAnim .8s linear infinite; pointer-events: none; }
-    @keyframes spinAnim { to { transform: rotate(360deg); } }
-    .spin-icon { animation: spinAnim .8s linear infinite; transform-origin: center; }
-
-    /* Modal */
-    .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 60;
-      display: flex; align-items: center; justify-content: center; padding: 16px;
-    }
-    .modal {
-      background: #fff; border-radius: 14px; padding: 28px;
-      max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.2);
-      h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-      p  { font-size: 13px; color: #666; line-height: 1.5; }
-    }
-    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+    .input-spin { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); color: #aaa; animation: spin .8s linear infinite; pointer-events: none; }
 
     /* Skeleton */
     .skel-rows { display: flex; flex-direction: column; gap: 8px; }
-    .skel-row  { height: 52px; background: #f5f5f7; border-radius: 10px; animation: pulse 1.4s infinite; }
-    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
-
-    /* Empty */
-    .empty-state {
-      display: flex; flex-direction: column; align-items: center; gap: 12px;
-      padding: 60px 0; color: #ccc;
-      p { font-size: 14px; color: #aaa; }
-    }
 
     @media (max-width: 768px) {
       .page { padding: 12px; }
       .filter-bar { flex-direction: column; }
       .data-table th:nth-child(3), .data-table td:nth-child(3),
       .data-table th:nth-child(4), .data-table td:nth-child(4) { display: none; }
+      .drawer { width: 100%; }
     }
   `]
 })
@@ -616,6 +520,22 @@ export class SuppliersComponent implements OnInit {
   private http   = inject(HttpClient);
   private route  = inject(ActivatedRoute);
   private router = inject(Router);
+
+  readonly Plus = Plus;
+  readonly ShoppingCart = ShoppingCart;
+  readonly Search = Search;
+  readonly SquarePen = SquarePen;
+  readonly Ban = Ban;
+  readonly CircleCheckBig = CircleCheckBig;
+  readonly Trash2 = Trash2;
+  readonly Folder = Folder;
+  readonly X = X;
+  readonly User = User;
+  readonly Phone = Phone;
+  readonly MapPin = MapPin;
+  readonly Clock = Clock;
+  readonly List = List;
+  readonly LoaderCircle = LoaderCircle;
 
   tab          = signal<Tab>('suppliers');
   loading      = signal(true);

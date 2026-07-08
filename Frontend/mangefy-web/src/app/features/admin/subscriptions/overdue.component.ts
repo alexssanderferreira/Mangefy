@@ -1,13 +1,14 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LucideAngularModule, Check, Search, X } from 'lucide-angular';
 import { SubscriptionService, SubscriptionDto, InvoiceDto } from './subscription.service';
 import { ToastService } from '../../../core/toast/toast.service';
 
 @Component({
   selector: 'app-overdue',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, LucideAngularModule],
   template: `
     <div class="page">
 
@@ -27,13 +28,13 @@ import { ToastService } from '../../../core/toast/toast.service';
       }
 
       @if (loading()) {
-        <div class="skel-rows">@for (i of [1,2,3,4]; track i) { <div class="skel-row"></div> }</div>
+        <div class="skel-rows">@for (i of [1,2,3,4]; track i) { <div class="skeleton-row" style="height:60px"></div> }</div>
       }
 
       @if (!loading() && overdueItems().length === 0) {
         <div class="empty-state">
           <div class="empty-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <lucide-icon [img]="Check" [size]="36" [strokeWidth]="1.5"></lucide-icon>
           </div>
           <p class="empty-title">Tudo em dia!</p>
           <p class="empty-sub">Nenhuma assinatura com faturas em atraso.</p>
@@ -58,7 +59,7 @@ import { ToastService } from '../../../core/toast/toast.service';
 
         <div class="filter-bar">
           <div class="search-wrap">
-            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <lucide-icon [img]="Search" [size]="14" [strokeWidth]="2" class="search-icon"></lucide-icon>
             <input class="search-input" type="text" placeholder="Buscar estabelecimento..." [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" />
           </div>
         </div>
@@ -88,7 +89,7 @@ import { ToastService } from '../../../core/toast/toast.service';
                   <td class="date-overdue">{{ oldestOverdue(s) }}</td>
                   <td>
                     <div class="row-actions" (click)="$event.stopPropagation()">
-                      <button class="btn-sm btn-primary" (click)="openPayment(s)" [disabled]="acting()">
+                      <button class="btn btn-sm btn-primary" (click)="openPayment(s)" [disabled]="acting()">
                         Confirmar Pagamento
                       </button>
                     </div>
@@ -117,8 +118,8 @@ import { ToastService } from '../../../core/toast/toast.service';
         <div class="drawer" (click)="$event.stopPropagation()">
           <div class="drawer-header">
             <h2 class="drawer-title">Confirmar Pagamento</h2>
-            <button class="drawer-close" (click)="closeDrawer()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <button class="btn-close" (click)="closeDrawer()">
+              <lucide-icon [img]="X" [size]="16" [strokeWidth]="2"></lucide-icon>
             </button>
           </div>
           <div class="drawer-body">
@@ -174,21 +175,10 @@ import { ToastService } from '../../../core/toast/toast.service';
   styles: [`
     .page { padding: 28px 32px; max-width: 1200px; }
     .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-    .page-title { font-size: 22px; font-weight: 700; color: var(--text-primary); margin: 0 0 4px; }
     .page-subtitle { font-size: 13px; color: var(--text-muted); margin: 0; }
 
-    .alert-error {
-      display: flex; align-items: center; gap: 8px;
-      background: rgba(224,49,49,.1); border: 1px solid rgba(224,49,49,.3);
-      color: var(--color-danger); border-radius: 8px; padding: 10px 14px;
-      font-size: 13px; margin-bottom: 16px;
-    }
-
     .skel-rows { display: flex; flex-direction: column; gap: 8px; }
-    .skel-row { height: 60px; background: var(--surface-bg); border-radius: 8px; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
 
-    .empty-state { text-align: center; padding: 64px 20px; }
     .empty-icon {
       width: 64px; height: 64px; border-radius: 50%;
       background: rgba(37,162,101,.1); color: #25a265;
@@ -200,7 +190,7 @@ import { ToastService } from '../../../core/toast/toast.service';
     .summary-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 24px; }
     .summary-card {
       padding: 20px 24px; border-radius: 12px;
-      background: rgba(224,49,49,.06); border: 1px solid rgba(224,49,49,.2);
+      background: rgba(var(--color-danger-rgb),.06); border: 1px solid rgba(var(--color-danger-rgb),.2);
     }
     .summary-value { font-size: 28px; font-weight: 800; color: var(--color-danger); line-height: 1; margin-bottom: 6px; }
     .summary-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
@@ -225,8 +215,8 @@ import { ToastService } from '../../../core/toast/toast.service';
     .data-table td { padding: 12px 14px; border-bottom: 1px solid var(--surface-border); color: var(--text-primary); vertical-align: middle; }
     .main-row td { border-bottom: none; }
     .clickable-row { cursor: pointer; transition: background .12s; &:hover { background: var(--surface-bg); } }
-    .sub-row { background: rgba(224,49,49,.02); }
-    .sub-row td { padding: 6px 14px; border-bottom: 1px solid rgba(224,49,49,.06); font-size: 12px; }
+    .sub-row { background: rgba(var(--color-danger-rgb),.02); }
+    .sub-row td { padding: 6px 14px; border-bottom: 1px solid rgba(var(--color-danger-rgb),.06); font-size: 12px; }
     .sub-row:last-of-type td { border-bottom: 1px solid var(--surface-border); }
     .sub-indent { padding-left: 28px !important; }
     .sub-label { color: var(--text-muted); }
@@ -238,45 +228,6 @@ import { ToastService } from '../../../core/toast/toast.service';
     .date-overdue { color: var(--color-danger); font-size: 12px; font-weight: 500; }
     .row-actions { display: flex; gap: 4px; }
 
-    .badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 99px; }
-    .badge-danger { background: rgba(224,49,49,.12); color: var(--color-danger); }
-
-    .btn-sm {
-      font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 7px;
-      cursor: pointer; border: none; transition: opacity .15s;
-      &:disabled { opacity: .5; cursor: not-allowed; }
-    }
-    .btn-primary { background: var(--color-brand); color: #fff; &:hover:not(:disabled){opacity:.88;} }
-
-    /* Drawer */
-    .drawer-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.4);
-      display: flex; justify-content: flex-end; z-index: 200; animation: fadeIn .15s ease;
-    }
-    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-    .drawer {
-      width: 420px; max-width: 95vw; background: var(--surface-card);
-      border-left: 1px solid var(--surface-border);
-      display: flex; flex-direction: column; height: 100vh; animation: slideIn .2s ease;
-    }
-    @keyframes slideIn { from{transform:translateX(40px);opacity:0} to{transform:translateX(0);opacity:1} }
-    .drawer-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 24px; border-bottom: 1px solid var(--surface-border);
-    }
-    .drawer-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0; }
-    .drawer-close {
-      width: 28px; height: 28px; border-radius: 6px; border: none;
-      background: transparent; color: var(--text-muted); cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      &:hover { background: var(--surface-bg); }
-    }
-    .drawer-body { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
-    .drawer-footer {
-      padding: 16px 24px; border-top: 1px solid var(--surface-border);
-      display: flex; justify-content: flex-end; gap: 8px;
-    }
-
     .info-card {
       background: var(--surface-bg); border: 1px solid var(--surface-border);
       border-radius: 10px; padding: 14px 16px;
@@ -285,7 +236,7 @@ import { ToastService } from '../../../core/toast/toast.service';
     .info-card-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
 
     .invoice-summary {
-      background: rgba(224,49,49,.05); border: 1px solid rgba(224,49,49,.15);
+      background: rgba(var(--color-danger-rgb),.05); border: 1px solid rgba(var(--color-danger-rgb),.15);
       border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
     }
     .invoice-summary-row {
@@ -304,16 +255,16 @@ import { ToastService } from '../../../core/toast/toast.service';
       &:focus { border-color: var(--color-brand); }
     }
     textarea.form-control { resize: vertical; font-family: inherit; }
-
-    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: opacity .15s; &:disabled{opacity:.5;cursor:not-allowed;} }
-    .btn-primary { background: var(--color-brand); color: #fff; &:hover:not(:disabled){opacity:.88;} }
-    .btn-ghost { background: transparent; color: var(--text-primary); border: 1px solid var(--surface-border); &:hover{background:var(--surface-bg);} }
   `]
 })
 export class OverdueComponent implements OnInit {
   private svc = inject(SubscriptionService);
   private toast = inject(ToastService);
   router = inject(Router);
+
+  readonly Check = Check;
+  readonly Search = Search;
+  readonly X = X;
 
   overdueItems = signal<SubscriptionDto[]>([]);
   loading = signal(true);

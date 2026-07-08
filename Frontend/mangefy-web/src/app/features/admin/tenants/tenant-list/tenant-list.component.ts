@@ -7,6 +7,7 @@ import { PlansService, PlanDto } from '../../plans/plans.service';
 import { OwnerService, OwnerListItemDto } from '../../owners/owner.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
+import { LucideAngularModule, Plus, X, Search, ChevronLeft, ChevronRight, House, CircleAlert, User, Check, LoaderCircle } from 'lucide-angular';
 
 interface BusinessTypeDto { id: string; name: string; }
 
@@ -30,11 +31,17 @@ const STATUS_LABEL: Record<string, string> = {
 const OWNER_STATUS_LABEL: Record<string, string> = {
   Active: 'Ativo', PendingActivation: 'Aguardando ativação', Inactive: 'Inativo',
 };
+const STATUS_BADGE_CLASS: Record<string, string> = {
+  Active: 'badge-success', TrialPeriod: 'badge-info', Suspended: 'badge-warning', Cancelled: 'badge-neutral',
+};
+const OWNER_STATUS_BADGE_CLASS: Record<string, string> = {
+  Active: 'badge-success', PendingActivation: 'badge-warning', Inactive: 'badge-neutral',
+};
 
 @Component({
   selector: 'app-tenant-list',
   standalone: true,
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, LucideAngularModule],
   template: `
     <div class="page">
 
@@ -45,21 +52,21 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
           <p class="page-subtitle">{{ total() }} estabelecimento{{ total() !== 1 ? 's' : '' }}</p>
         </div>
         <button class="btn btn-primary" (click)="openCreate()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <lucide-icon [img]="Plus" [size]="14" [strokeWidth]="2.5"></lucide-icon>
           Novo Estabelecimento
         </button>
       </div>
 
       <!-- Quick filter tabs -->
-      <div class="qtabs">
-        <button class="qtab" [class.active]="filterStatus() === ''"           (click)="filterStatus.set('')">Todos</button>
-        <button class="qtab" [class.active]="filterStatus() === 'Active'"      (click)="filterStatus.set('Active')">Ativos</button>
-        <button class="qtab" [class.active]="filterStatus() === 'TrialPeriod'" (click)="filterStatus.set('TrialPeriod')">Trial</button>
-        <button class="qtab" [class.active]="filterStatus() === 'Suspended'"   (click)="filterStatus.set('Suspended')">Suspensos</button>
-        <button class="qtab" [class.active]="filterStatus() === 'Cancelled'"   (click)="filterStatus.set('Cancelled')">Cancelados</button>
+      <div class="filter-chips">
+        <button class="filter-chip" [class.active]="filterStatus() === ''"           (click)="filterStatus.set('')">Todos</button>
+        <button class="filter-chip" [class.active]="filterStatus() === 'Active'"      (click)="filterStatus.set('Active')">Ativos</button>
+        <button class="filter-chip" [class.active]="filterStatus() === 'TrialPeriod'" (click)="filterStatus.set('TrialPeriod')">Trial</button>
+        <button class="filter-chip" [class.active]="filterStatus() === 'Suspended'"   (click)="filterStatus.set('Suspended')">Suspensos</button>
+        <button class="filter-chip" [class.active]="filterStatus() === 'Cancelled'"   (click)="filterStatus.set('Cancelled')">Cancelados</button>
         @if (search() || filterStatus()) {
-          <button class="qtab-clear" (click)="search.set(''); filterStatus.set('')">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <button class="filter-chip-clear" (click)="search.set(''); filterStatus.set('')">
+            <lucide-icon [img]="X" [size]="11" [strokeWidth]="2.5"></lucide-icon>
             Limpar filtros
           </button>
         }
@@ -68,7 +75,7 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
       <!-- Filtros -->
       <div class="filters">
         <div class="search-wrap">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <lucide-icon [img]="Search" [size]="14" [strokeWidth]="2"></lucide-icon>
           <input class="search-input" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Buscar por nome ou slug..." />
         </div>
         <select class="filter-select" [ngModel]="pageSize()" (ngModelChange)="onPageSizeChange($event)">
@@ -136,7 +143,7 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
                   </td>
                   <td class="td-slug" [title]="t.slug">{{ t.slug }}</td>
                   <td class="td-email" [title]="t.email ?? ''">{{ t.email ?? '—' }}</td>
-                  <td><span class="badge badge-{{ t.status }}">{{ statusLabel(t.status) }}</span></td>
+                  <td><span class="badge" [class]="statusBadgeClass(t.status)">{{ statusLabel(t.status) }}</span></td>
                   <td class="td-plan">{{ planName(t.planId) }}</td>
                   <td class="td-type" [title]="businessTypeName(t.businessTypeId)">{{ businessTypeName(t.businessTypeId) }}</td>
                   <td>
@@ -159,7 +166,7 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
       @if (totalPages() > 1) {
         <div class="pagination">
           <button class="pg-btn" (click)="goPage(page() - 1)" [disabled]="page() === 1">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            <lucide-icon [img]="ChevronLeft" [size]="14" [strokeWidth]="2"></lucide-icon>
           </button>
           @for (p of pageNumbers(); track p) {
             @if (p === -1) {
@@ -169,7 +176,7 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
             }
           }
           <button class="pg-btn" (click)="goPage(page() + 1)" [disabled]="page() === totalPages()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <lucide-icon [img]="ChevronRight" [size]="14" [strokeWidth]="2"></lucide-icon>
           </button>
           <span class="pg-info">{{ (page() - 1) * pageSize() + 1 }}–{{ min(page() * pageSize(), total()) }} de {{ total() }}</span>
         </div>
@@ -178,12 +185,12 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
 
     <!-- ── Drawer criar ── -->
     @if (drawerOpen()) {
-      <div class="overlay" (click)="closeDrawer()"></div>
+      <div class="drawer-overlay" (click)="closeDrawer()"></div>
       <aside class="drawer">
         <div class="drawer-header">
           <div class="drawer-header-left">
             <div class="drawer-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <lucide-icon [img]="House" [size]="16" [strokeWidth]="2"></lucide-icon>
             </div>
             <div>
               <h3 class="drawer-title">Novo Estabelecimento</h3>
@@ -191,14 +198,14 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
             </div>
           </div>
           <button class="btn-close" (click)="closeDrawer()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <lucide-icon [img]="X" [size]="16" [strokeWidth]="2"></lucide-icon>
           </button>
         </div>
 
         <div class="drawer-body">
           @if (drawerError()) {
             <div class="alert-error">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <lucide-icon [img]="CircleAlert" [size]="14" [strokeWidth]="2"></lucide-icon>
               {{ drawerError() }}
             </div>
           }
@@ -206,7 +213,7 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
           <!-- Seção: Identificação -->
           <div class="form-section">
             <div class="form-section-header">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              <lucide-icon [img]="House" [size]="12" [strokeWidth]="2.5"></lucide-icon>
               Identificação
             </div>
             <div class="field">
@@ -247,7 +254,7 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
           <!-- Seção: Atribuição -->
           <div class="form-section">
             <div class="form-section-header">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <lucide-icon [img]="User" [size]="12" [strokeWidth]="2.5"></lucide-icon>
               Atribuição
             </div>
             <div class="field">
@@ -256,7 +263,7 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
                 <span style="font-weight:400;color:#bbb;font-size:11px">Busque pelo nome ou e-mail</span>
               </label>
               <div class="owner-search-wrap" [class.focused]="ownerSearchFocused">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <lucide-icon [img]="Search" [size]="13" [strokeWidth]="2"></lucide-icon>
                 <input class="owner-search-input"
                   [ngModel]="ownerSearchText()"
                   (ngModelChange)="onOwnerSearch($event)"
@@ -265,7 +272,7 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
                   placeholder="Buscar dono..." />
                 @if (form.ownerId) {
                   <button class="owner-clear-btn" type="button" (mousedown)="clearOwner($event)">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    <lucide-icon [img]="X" [size]="12" [strokeWidth]="2.5"></lucide-icon>
                   </button>
                 }
               </div>
@@ -278,14 +285,14 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
                         <span class="owner-opt-name">{{ o.name }}</span>
                         <span class="owner-opt-email">{{ o.email }}</span>
                       </span>
-                      <span class="badge badge-{{ o.status }} owner-opt-badge">{{ ownerStatusLabel(o.status) }}</span>
+                      <span class="badge owner-opt-badge" [class]="ownerStatusBadgeClass(o.status)">{{ ownerStatusLabel(o.status) }}</span>
                     </button>
                   }
                 </div>
               }
               @if (form.ownerId && selectedOwner()) {
                 <div class="owner-selected">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <lucide-icon [img]="Check" [size]="12" [strokeWidth]="2.5"></lucide-icon>
                   {{ selectedOwner()!.name }} — {{ selectedOwner()!.email }}
                 </div>
               }
@@ -319,7 +326,7 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
           <button class="btn btn-ghost" (click)="closeDrawer()">Cancelar</button>
           <button class="btn btn-primary" (click)="submit()" [disabled]="saving()">
             @if (saving()) {
-              <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              <lucide-icon class="icon-spin" [img]="LoaderCircle" [size]="14" [strokeWidth]="2.5"></lucide-icon>
               Criando...
             } @else { Criar Estabelecimento }
           </button>
@@ -334,27 +341,7 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 16px;
     }
-    .page-title  { font-size: 20px; font-weight: 700; color: #111; }
     .page-subtitle { font-size: 12px; color: #aaa; margin-top: 2px; }
-
-    /* Quick filter tabs */
-    .qtabs {
-      display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-bottom: 10px;
-    }
-    .qtab {
-      padding: 5px 14px; border-radius: 99px; border: 1px solid #e8e8ec;
-      background: #fff; color: #666; font-size: 12px; font-weight: 600; cursor: pointer;
-      transition: all .15s;
-      &:hover { background: #f5f5f7; border-color: #d0d0d8; color: #333; }
-      &.active { background: var(--color-brand); color: #fff; border-color: transparent; }
-    }
-    .qtab-clear {
-      display: inline-flex; align-items: center; gap: 5px; margin-left: 4px;
-      padding: 5px 12px; border-radius: 99px; border: none;
-      background: #fef2f2; color: #b91c1c; font-size: 11px; font-weight: 600; cursor: pointer;
-      transition: background .15s;
-      &:hover { background: #fee2e2; }
-    }
 
     /* Filtros */
     .filters { display: flex; gap: 10px; margin-bottom: 12px; }
@@ -363,7 +350,7 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
       display: flex; align-items: center; gap: 8px;
       background: #fff; border: 1px solid #e8e8ec; border-radius: 8px;
       padding: 7px 12px;
-      svg { color: #bbb; flex-shrink: 0; }
+      lucide-icon { color: #bbb; flex-shrink: 0; }
       &:focus-within { border-color: var(--color-brand); }
     }
     .search-input {
@@ -407,67 +394,22 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
     .td-plan  { font-size: 12px; color: #333; font-weight: 600; }
     .td-type  { font-size: 12px; color: #777; }
     .td-muted { color: #999; font-size: 12px; }
-    .empty-cell { text-align: center; padding: 48px; color: #ccc; font-size: 13px; }
     .th-sort { cursor: pointer; user-select: none; &:hover { color: #555; background: #f4f4f6; } }
     .sort-icon { font-size: 10px; opacity: .4; margin-left: 2px; }
 
-    /* Pagination */
-    .pagination {
-      display: flex; align-items: center; gap: 4px;
-      padding: 14px 16px; border-top: 1px solid #f0f0f3;
-      flex-wrap: wrap;
-    }
-    .pg-btn {
-      min-width: 32px; height: 32px; padding: 0 8px;
-      border-radius: 7px; border: 1px solid #e8e8ec;
-      background: #fff; color: #555; font-size: 13px; font-weight: 500;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: all .12s;
-      &:hover:not(:disabled) { background: #f4f4f6; border-color: #d0d0d8; }
-      &:disabled { opacity: .35; cursor: not-allowed; }
-      &.pg-active { background: var(--color-brand); color: #fff; border-color: transparent; }
-    }
-    .pg-dots { padding: 0 4px; color: #aaa; font-size: 13px; }
-    .pg-info { margin-left: 8px; font-size: 12px; color: #aaa; white-space: nowrap; }
     .trial-days {
       display: inline-block; padding: 2px 9px; border-radius: 99px;
       font-size: 11px; font-weight: 700;
       background: #dbeafe; color: #1d4ed8;
     }
     .trial-expired { background: #fee2e2; color: #b91c1c; }
-    /* Skeleton */
-    .skel {
-      height: 12px; border-radius: 6px;
-      background: linear-gradient(90deg, #f0f0f3 25%, #e8e8ec 50%, #f0f0f3 75%);
-      background-size: 200% 100%; animation: shimmer 1.4s infinite;
-    }
-    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-    /* Badges */
-    .badge {
-      display: inline-block; padding: 3px 10px; border-radius: 99px;
-      font-size: 11px; font-weight: 700; white-space: nowrap;
-      &-Active     { background: #dcfce7; color: #15803d; }
-      &-TrialPeriod{ background: #dbeafe; color: #1d4ed8; }
-      &-Suspended  { background: #fef3c7; color: #b45309; }
-      &-Cancelled  { background: #f4f4f5; color: #71717a; }
-    }
-
-    /* Alert */
-    .alert-error {
-      display: flex; align-items: center; gap: 8px;
-      background: #fef2f2; color: #b91c1c;
-      border: 1px solid #fecaca; border-radius: 10px;
-      padding: 12px 14px; font-size: 13px; margin-bottom: 20px;
-    }
-    .mb-16 { margin-bottom: 16px; }
 
     /* Owner search */
     .owner-search-wrap {
       display: flex; align-items: center; gap: 8px;
       border: 1px solid #e8e8ec; border-radius: 8px; padding: 8px 10px;
       background: #fff; transition: border-color .15s;
-      svg { color: #bbb; flex-shrink: 0; }
+      lucide-icon { color: #bbb; flex-shrink: 0; }
       &.focused { border-color: var(--color-brand); }
     }
     .owner-search-input { flex: 1; border: none; outline: none; font-size: 13px; color: #111; &::placeholder { color: #ccc; } }
@@ -497,48 +439,12 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
     .owner-selected {
       display: inline-flex; align-items: center; gap: 5px;
       font-size: 11px; color: #15803d; margin-top: 4px;
-      svg { color: #16a34a; }
+      lucide-icon { color: #16a34a; }
     }
-
-    /* Buttons */
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 16px; border-radius: 8px;
-      font-size: 13px; font-weight: 600; cursor: pointer;
-      border: none; transition: all .15s;
-    }
-    .btn-primary { background: var(--color-brand); color: #fff; &:hover { opacity: .9; } &:disabled { opacity: .5; cursor: not-allowed; } }
-    .btn-ghost   { background: #f4f4f5; color: #555; border: 1px solid #e8e8ec; &:hover { background: #ebebef; } }
-
-    /* Overlay + Drawer */
-    .overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.3);
-      z-index: 100; backdrop-filter: blur(2px);
-    }
-    .drawer {
-      position: fixed; top: 0; right: 0; bottom: 0;
-      width: 440px; background: #fff;
-      border-left: 1px solid #e8e8ec; z-index: 101;
-      display: flex; flex-direction: column;
-      box-shadow: -8px 0 32px rgba(0,0,0,.1);
-      animation: slideIn .2s ease;
-    }
-    @keyframes slideIn {
-      from { transform: translateX(100%); }
-      to   { transform: translateX(0); }
-    }
-    .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #f0f0f3; flex-shrink: 0; background: #fff; }
-    .drawer-header-left { display: flex; align-items: center; gap: 12px; }
-    .drawer-icon { width: 36px; height: 36px; border-radius: 10px; background: color-mix(in srgb, var(--color-brand) 10%, transparent); color: var(--color-brand); display: flex; align-items: center; justify-content: center; }
-    .drawer-title { font-size: 15px; font-weight: 700; color: #111; }
-    .drawer-subtitle { font-size: 11px; color: #aaa; margin-top: 1px; }
-    .btn-close { width: 30px; height: 30px; border-radius: 7px; border: 1px solid #e8e8ec; background: #fff; color: #888; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .12s; &:hover { background: #f4f4f5; color: #333; } }
-    .drawer-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
-    .drawer-footer { padding: 14px 20px; border-top: 1px solid #f0f0f3; display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0; background: #fafafa; }
 
     /* Form sections */
     .form-section { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: #fafafa; border: 1px solid #f0f0f3; border-radius: 10px; }
-    .form-section-header { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #999; svg { color: var(--color-brand); } }
+    .form-section-header { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #999; lucide-icon { color: var(--color-brand); } }
     .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
     /* Form fields */
@@ -555,8 +461,6 @@ const OWNER_STATUS_LABEL: Record<string, string> = {
     }
     .field-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 26px; cursor: pointer; }
     .field-error { font-size: 11px; color: #dc2626; }
-    @keyframes spinAnim { to { transform: rotate(360deg); } }
-    .spin-icon { animation: spinAnim .8s linear infinite; transform-origin: center; }
 
     /* Responsive */
     @media (max-width: 768px) {
@@ -604,6 +508,17 @@ export class TenantListComponent implements OnInit {
   private http = inject(HttpClient);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+
+  readonly Plus = Plus;
+  readonly X = X;
+  readonly Search = Search;
+  readonly ChevronLeft = ChevronLeft;
+  readonly ChevronRight = ChevronRight;
+  readonly House = House;
+  readonly CircleAlert = CircleAlert;
+  readonly User = User;
+  readonly Check = Check;
+  readonly LoaderCircle = LoaderCircle;
 
   tenants       = signal<TenantDto[]>([]);
   loading       = signal(true);
@@ -804,6 +719,8 @@ export class TenantListComponent implements OnInit {
   }
 
   ownerStatusLabel(s: string) { return OWNER_STATUS_LABEL[s] ?? s; }
+  statusBadgeClass(s: string) { return STATUS_BADGE_CLASS[s] ?? 'badge-neutral'; }
+  ownerStatusBadgeClass(s: string) { return OWNER_STATUS_BADGE_CLASS[s] ?? 'badge-neutral'; }
 
   closeDrawer() { if (!this.saving()) this.drawerOpen.set(false); }
 

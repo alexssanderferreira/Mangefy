@@ -9,6 +9,7 @@ import { PlansService, PlanDto } from '../../plans/plans.service';
 import { SubscriptionService, SubscriptionDto, InvoiceDto } from '../../subscriptions/subscription.service';
 import { ToastService } from '../../../../core/toast/toast.service';
 import { environment } from '../../../../../environments/environment';
+import { LucideAngularModule, ChevronLeft, SquarePen, MapPin, Clock, Table, Layers, Users, Sun, DollarSign, Check, X, TriangleAlert } from 'lucide-angular';
 
 type Tab = 'info' | 'employees' | 'financeiro';
 
@@ -20,25 +21,37 @@ const STATUS_LABEL: Record<string, string> = {
 const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
   Active: 'Ativo', PendingActivation: 'Pendente', Inactive: 'Inativo',
 };
+const STATUS_BADGE_CLASS: Record<string, string> = {
+  Active: 'badge-success', TrialPeriod: 'badge-info', Suspended: 'badge-warning', Cancelled: 'badge-neutral',
+};
+const EMPLOYEE_STATUS_BADGE_CLASS: Record<string, string> = {
+  Active: 'badge-success', PendingActivation: 'badge-warning', Inactive: 'badge-neutral',
+};
+const SUB_STATUS_BADGE_CLASS: Record<string, string> = {
+  EmDia: 'badge-success', AguardandoPagamento: 'badge-warning', Inadimplente: 'badge-danger', SemFaturas: 'badge-neutral',
+};
+const INV_STATUS_BADGE_CLASS: Record<string, string> = {
+  Paid: 'badge-success', Pending: 'badge-warning', Overdue: 'badge-danger',
+};
 
 @Component({
   selector: 'app-tenant-detail',
   standalone: true,
-  imports: [DatePipe, CurrencyPipe, DecimalPipe, FormsModule],
+  imports: [DatePipe, CurrencyPipe, DecimalPipe, FormsModule, LucideAngularModule],
   template: `
     <div class="page">
 
       <!-- Breadcrumb -->
       <div class="breadcrumb">
         <button class="back-btn" (click)="goBack()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          <lucide-icon [img]="ChevronLeft" [size]="14" [strokeWidth]="2"></lucide-icon>
           Estabelecimentos
         </button>
         @if (tenant()) { <span class="sep">/</span> <span class="bc-current">{{ tenant()!.name }}</span> }
       </div>
 
       @if (loading()) {
-        <div class="loading-state"><div class="spin"></div></div>
+        <div class="loading-state"><div class="spinner"></div></div>
       } @else if (!tenant()) {
         <div class="empty-state">Estabelecimento não encontrado.</div>
       } @else {
@@ -50,7 +63,7 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
             <div>
               <div class="tenant-name-row">
                 <h1 class="tenant-name">{{ tenant()!.name }}</h1>
-                <span class="badge badge-{{ tenant()!.status }}">{{ statusLabel(tenant()!.status) }}</span>
+                <span class="badge" [class]="statusBadgeClass(tenant()!.status)">{{ statusLabel(tenant()!.status) }}</span>
               </div>
               <div class="tenant-slug">{{ tenant()!.slug }}</div>
             </div>
@@ -96,7 +109,7 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
                 <h3 class="card-title">Dados Gerais</h3>
                 @if (!editing()) {
                   <button class="btn-edit" (click)="startEdit()">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <lucide-icon [img]="SquarePen" [size]="13" [strokeWidth]="2"></lucide-icon>
                     Editar
                   </button>
                 }
@@ -109,21 +122,21 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
                   <div class="field-row">
                     <div class="field">
                       <label class="field-label">Nome</label>
-                      <input class="field-input" [(ngModel)]="editForm.name" placeholder="Nome do estabelecimento">
+                      <input class="input" [(ngModel)]="editForm.name" placeholder="Nome do estabelecimento">
                     </div>
                     <div class="field">
                       <label class="field-label">E-mail (opcional)</label>
-                      <input class="field-input" [(ngModel)]="editForm.email" type="email" placeholder="email@exemplo.com">
+                      <input class="input" [(ngModel)]="editForm.email" type="email" placeholder="email@exemplo.com">
                     </div>
                   </div>
                   <div class="field-row">
                     <div class="field">
                       <label class="field-label">Telefone</label>
-                      <input class="field-input" [(ngModel)]="editForm.phone" type="tel" placeholder="(11) 99999-9999">
+                      <input class="input" [(ngModel)]="editForm.phone" type="tel" placeholder="(11) 99999-9999">
                     </div>
                     <div class="field">
                       <label class="field-label">Fuso Horário</label>
-                      <select class="field-input" [(ngModel)]="editForm.timezone">
+                      <select class="input" [(ngModel)]="editForm.timezone">
                         <option value="America/Sao_Paulo">America/Sao_Paulo</option>
                         <option value="America/Manaus">America/Manaus</option>
                         <option value="America/Belem">America/Belem</option>
@@ -143,37 +156,37 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
                     <div class="field field-cep">
                       <label class="field-label">CEP</label>
                       <div class="cep-row">
-                        <input class="field-input" [(ngModel)]="editForm.cep" placeholder="00000-000" maxlength="9" (blur)="lookupCep()">
+                        <input class="input" [(ngModel)]="editForm.cep" placeholder="00000-000" maxlength="9" (blur)="lookupCep()">
                         @if (cepLoading()) { <div class="cep-spin"></div> }
                       </div>
                     </div>
                     <div class="field">
                       <label class="field-label">Logradouro</label>
-                      <input class="field-input" [(ngModel)]="editForm.logradouro" placeholder="Rua, Av...">
+                      <input class="input" [(ngModel)]="editForm.logradouro" placeholder="Rua, Av...">
                     </div>
                   </div>
                   <div class="field-row">
                     <div class="field field-num">
                       <label class="field-label">Número</label>
-                      <input class="field-input" [(ngModel)]="editForm.numero" placeholder="Nº">
+                      <input class="input" [(ngModel)]="editForm.numero" placeholder="Nº">
                     </div>
                     <div class="field">
                       <label class="field-label">Complemento</label>
-                      <input class="field-input" [(ngModel)]="editForm.complemento" placeholder="Apto, sala...">
+                      <input class="input" [(ngModel)]="editForm.complemento" placeholder="Apto, sala...">
                     </div>
                     <div class="field">
                       <label class="field-label">Bairro</label>
-                      <input class="field-input" [(ngModel)]="editForm.bairro" placeholder="Bairro">
+                      <input class="input" [(ngModel)]="editForm.bairro" placeholder="Bairro">
                     </div>
                   </div>
                   <div class="field-row">
                     <div class="field">
                       <label class="field-label">Cidade</label>
-                      <input class="field-input" [(ngModel)]="editForm.cidade" placeholder="Cidade">
+                      <input class="input" [(ngModel)]="editForm.cidade" placeholder="Cidade">
                     </div>
                     <div class="field field-uf">
                       <label class="field-label">UF</label>
-                      <input class="field-input" [(ngModel)]="editForm.uf" placeholder="SP" maxlength="2" style="text-transform:uppercase">
+                      <input class="input" [(ngModel)]="editForm.uf" placeholder="SP" maxlength="2" style="text-transform:uppercase">
                     </div>
                   </div>
 
@@ -209,7 +222,7 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
                 @if (tenant()!.address; as addr) {
                   <div class="address-block">
                     <div class="address-title">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                      <lucide-icon [img]="MapPin" [size]="12" [strokeWidth]="2"></lucide-icon>
                       Endereço
                     </div>
                     <div class="address-text">
@@ -240,7 +253,7 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
 
               @if (tenant()!.status === 'TrialPeriod' && tenant()!.trialEndsAt) {
                 <div class="plan-trial">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <lucide-icon [img]="Clock" [size]="13" [strokeWidth]="2"></lucide-icon>
                   Trial até {{ tenant()!.trialEndsAt | date:'dd/MM/yyyy' }}
                   <span class="days-left">({{ daysLeft(tenant()!.trialEndsAt!) }} dias)</span>
                 </div>
@@ -261,7 +274,7 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
                   </div>
                 } @else {
                   <button class="plan-alter-btn" (click)="openChangePlan()">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <lucide-icon [img]="SquarePen" [size]="13" [strokeWidth]="2"></lucide-icon>
                     Alterar plano
                   </button>
                 }
@@ -274,28 +287,28 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
                 <h3 class="card-title">Limites do Plano</h3>
                 <div class="limits-grid">
                   <div class="limit-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+                    <lucide-icon [img]="Table" [size]="16" [strokeWidth]="2"></lucide-icon>
                     <div>
                       <div class="limit-val">{{ plan.maxTables }}</div>
                       <div class="limit-lbl">Mesas</div>
                     </div>
                   </div>
                   <div class="limit-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    <lucide-icon [img]="Layers" [size]="16" [strokeWidth]="2"></lucide-icon>
                     <div>
                       <div class="limit-val">{{ plan.maxMenuItems }}</div>
                       <div class="limit-lbl">Itens no cardápio</div>
                     </div>
                   </div>
                   <div class="limit-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <lucide-icon [img]="Users" [size]="16" [strokeWidth]="2"></lucide-icon>
                     <div>
                       <div class="limit-val">{{ plan.maxUsers }}</div>
                       <div class="limit-lbl">Usuários</div>
                     </div>
                   </div>
                   <div class="limit-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M19.07 19.07l-1.41-1.41M5.34 5.34L3.93 3.93M21 12h-2M5 12H3M12 21v-2M12 5V3"/></svg>
+                    <lucide-icon [img]="Sun" [size]="16" [strokeWidth]="2"></lucide-icon>
                     <div>
                       <div class="limit-val">{{ plan.maxCustomRoles }}</div>
                       <div class="limit-lbl">Funções personalizadas</div>
@@ -312,10 +325,10 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
         @if (activeTab() === 'financeiro') {
           <div class="fin-section">
             @if (loadingSubscription()) {
-              <div class="loading-state"><div class="spin"></div></div>
+              <div class="loading-state"><div class="spinner"></div></div>
             } @else if (!subscription()) {
               <div class="fin-empty">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <lucide-icon [img]="DollarSign" [size]="32" [strokeWidth]="1.5"></lucide-icon>
                 <p>Nenhuma assinatura encontrada para este estabelecimento.</p>
               </div>
             } @else {
@@ -324,7 +337,7 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
                 <div class="fin-summary-card">
                   <div class="fin-summary-label">Status</div>
                   <div class="fin-summary-value">
-                    <span [class]="'sub-badge sub-badge-' + subscription()!.status">{{ subStatusLabel(subscription()!.status) }}</span>
+                    <span [class]="'badge ' + subStatusBadgeClass(subscription()!.status)">{{ subStatusLabel(subscription()!.status) }}</span>
                   </div>
                 </div>
                 <div class="fin-summary-card">
@@ -359,13 +372,13 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
               <div class="fin-actions">
                 @if (!openInvoice()) {
                   <button class="btn btn-primary btn-sm-act" (click)="openInvoiceDrawer()">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <lucide-icon [img]="DollarSign" [size]="13" [strokeWidth]="2"></lucide-icon>
                     Gerar Fatura
                   </button>
                 }
                 @if (openInvoice()) {
                   <button class="btn btn-success btn-sm-act" (click)="openPaymentDrawer()">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <lucide-icon [img]="Check" [size]="13" [strokeWidth]="2"></lucide-icon>
                     Confirmar Pagamento
                   </button>
                 }
@@ -391,7 +404,7 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
                           <tr [class.row-overdue]="inv.status === 'Overdue'" [class.row-paid]="inv.status === 'Paid'">
                             <td>{{ formatDate(inv.dueDate) }}</td>
                             <td class="td-amount">R$ {{ inv.amount.toFixed(2) }}</td>
-                            <td><span [class]="'inv-badge inv-badge-' + inv.status">{{ invStatusLabel(inv.status) }}</span></td>
+                            <td><span [class]="'badge ' + invStatusBadgeClass(inv.status)">{{ invStatusLabel(inv.status) }}</span></td>
                             <td class="td-muted">{{ inv.paidAt ? formatDate(inv.paidAt) : '—' }}</td>
                             <td class="td-muted td-ref">{{ inv.paymentReference || '—' }}</td>
                           </tr>
@@ -409,7 +422,7 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
         @if (activeTab() === 'employees') {
           <div class="employees-section">
             @if (loadingEmployees()) {
-              <div class="loading-state"><div class="spin"></div></div>
+              <div class="loading-state"><div class="spinner"></div></div>
             } @else {
               <div class="table-wrap">
                 <table class="table">
@@ -428,7 +441,7 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
                         <tr>
                           <td class="td-name">{{ e.name }}</td>
                           <td class="td-email">{{ e.email }}</td>
-                          <td><span class="badge-emp badge-emp-{{ e.status }}">{{ employeeStatusLabel(e.status) }}</span></td>
+                          <td><span class="badge" [class]="empStatusBadgeClass(e.status)">{{ employeeStatusLabel(e.status) }}</span></td>
                           <td>Funcionário</td>
                           <td class="td-muted">{{ e.lastLoginAt ? (e.lastLoginAt | date:'dd/MM/yyyy HH:mm') : 'Nunca' }}</td>
                         </tr>
@@ -449,8 +462,8 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
         <div class="drawer" (click)="$event.stopPropagation()">
           <div class="drawer-header">
             <h2 class="drawer-title">Gerar Fatura</h2>
-            <button class="drawer-close" (click)="finDrawer.set(null)">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <button class="btn-close" (click)="finDrawer.set(null)">
+              <lucide-icon [img]="X" [size]="16" [strokeWidth]="2"></lucide-icon>
             </button>
           </div>
           <div class="drawer-body">
@@ -462,13 +475,13 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
               <label class="form-label">Valor (R$)</label>
               <div class="input-group">
                 <span class="input-addon">R$</span>
-                <input class="form-control input-group-field" type="text" inputmode="decimal"
+                <input class="input input-group-field" type="text" inputmode="decimal"
                   [value]="finAmountStr" (input)="finAmountStr = $any($event.target).value" placeholder="0,00" />
               </div>
             </div>
             <div class="form-group">
               <label class="form-label">Data de vencimento</label>
-              <input class="form-control" type="date" [(ngModel)]="finDueDate" />
+              <input class="input" type="date" [(ngModel)]="finDueDate" />
             </div>
           </div>
           <div class="drawer-footer">
@@ -487,8 +500,8 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
         <div class="drawer" (click)="$event.stopPropagation()">
           <div class="drawer-header">
             <h2 class="drawer-title">Confirmar Pagamento</h2>
-            <button class="drawer-close" (click)="finDrawer.set(null)">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <button class="btn-close" (click)="finDrawer.set(null)">
+              <lucide-icon [img]="X" [size]="16" [strokeWidth]="2"></lucide-icon>
             </button>
           </div>
           <div class="drawer-body">
@@ -497,25 +510,25 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
               <div class="dic-sub">Fatura: R$ {{ openInvoice()?.amount?.toFixed(2) }} · venc. {{ formatDate(openInvoice()?.dueDate ?? '') }}</div>
             </div>
             @if (subscription()!.overdueCount > 1) {
-              <div class="alert-warn-sm">
+              <div class="alert-warn">
                 {{ subscription()!.overdueCount }} faturas em atraso. O pagamento será aplicado à mais antiga.
               </div>
             }
             <div class="form-group">
               <label class="form-label">Data do pagamento</label>
-              <input class="form-control" type="date" [(ngModel)]="finPaidAt" />
+              <input class="input" type="date" [(ngModel)]="finPaidAt" />
             </div>
             <div class="form-group">
               <label class="form-label">Próximo vencimento</label>
-              <input class="form-control" type="date" [(ngModel)]="finNextDueDate" />
+              <input class="input" type="date" [(ngModel)]="finNextDueDate" />
             </div>
             <div class="form-group">
               <label class="form-label">Referência de pagamento</label>
-              <input class="form-control" type="text" [(ngModel)]="finPaymentRef" placeholder="Número do boleto, código PIX..." />
+              <input class="input" type="text" [(ngModel)]="finPaymentRef" placeholder="Número do boleto, código PIX..." />
             </div>
             <div class="form-group">
               <label class="form-label">Observações</label>
-              <textarea class="form-control" rows="3" [(ngModel)]="finNotes"></textarea>
+              <textarea class="input" rows="3" [(ngModel)]="finNotes"></textarea>
             </div>
           </div>
           <div class="drawer-footer">
@@ -533,7 +546,7 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
       <div class="modal-overlay" (click)="cancelModal.set(false)">
         <div class="modal" (click)="$event.stopPropagation()">
           <div class="modal-icon warn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <lucide-icon [img]="TriangleAlert" [size]="24" [strokeWidth]="2"></lucide-icon>
           </div>
           <h3 class="modal-title">Cancelar conta</h3>
           <p class="modal-body">Tem certeza que quer cancelar a conta de <strong>{{ tenant()?.name }}</strong>?<br>Esta ação é irreversível.</p>
@@ -572,19 +585,9 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
       font-size: 22px; font-weight: 800; flex-shrink: 0;
     }
     .tenant-name-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .tenant-name { font-size: 22px; font-weight: 700; color: #111; }
+    .tenant-name { font-size: 20px; font-weight: 700; color: #111; }
     .tenant-slug { font-size: 13px; color: #aaa; font-family: monospace; margin-top: 4px; }
     .header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-
-    /* Tabs */
-    .tabs { display: flex; border-bottom: 2px solid #f0f0f3; margin-bottom: 20px; }
-    .tab {
-      padding: 10px 18px; border: none; background: none;
-      font-size: 13px; font-weight: 600; color: #aaa; cursor: pointer;
-      border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s;
-      &:hover { color: #555; }
-      &.active { color: var(--color-brand); border-bottom-color: var(--color-brand); }
-    }
 
     /* Info layout: 3 col grid */
     .info-layout {
@@ -636,7 +639,7 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
       &:hover { background: #ebebef; }
       &:disabled { opacity: .5; cursor: not-allowed; }
       &--primary { background: var(--color-brand); color: #fff; border-color: transparent; &:hover { opacity: .9; } }
-      &--ghost { background: transparent; border-color: transparent; color: #aaa; padding: 3px 6px; &:hover { color: var(--color-brand); background: rgba(224,49,49,.06); } }
+      &--ghost { background: transparent; border-color: transparent; color: #aaa; padding: 3px 6px; &:hover { color: var(--color-brand); background: rgba(var(--color-brand-rgb),.06); } }
     }
 
     /* Edit form */
@@ -648,12 +651,6 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
     .field-num  { max-width: 100px; }
     .field-uf   { max-width: 80px; }
     .field-label { font-size: 12px; font-weight: 600; color: #555; }
-    .field-input {
-      padding: 9px 12px; border: 1px solid #e8e8ec; border-radius: 8px;
-      font-size: 13px; color: #111; outline: none; transition: border-color .15s;
-      background: #fff; width: 100%; box-sizing: border-box;
-      &:focus { border-color: var(--color-brand); }
-    }
     .cep-row { position: relative; display: flex; align-items: center; }
     .cep-spin {
       position: absolute; right: 10px;
@@ -723,7 +720,7 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
     .limit-item {
       display: flex; align-items: flex-start; gap: 10px;
       padding: 14px; background: #fafafa; border-radius: 10px; border: 1px solid #f0f0f3;
-      svg { color: var(--color-brand); flex-shrink: 0; margin-top: 2px; }
+      lucide-icon { color: var(--color-brand); flex-shrink: 0; margin-top: 2px; }
     }
     .limit-val { font-size: 20px; font-weight: 800; color: #111; }
     .limit-lbl { font-size: 11px; color: #aaa; margin-top: 2px; }
@@ -747,85 +744,20 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
     .empty-cell { text-align: center; padding: 40px; color: #ccc; }
 
     /* Badges */
-    .badge {
-      display: inline-block; padding: 4px 12px; border-radius: 99px;
-      font-size: 11px; font-weight: 700; white-space: nowrap;
-      &-Active      { background: #dcfce7; color: #15803d; }
-      &-TrialPeriod { background: #dbeafe; color: #1d4ed8; }
-      &-Suspended   { background: #fef3c7; color: #b45309; }
-      &-Cancelled   { background: #f4f4f5; color: #71717a; }
-    }
-    .badge-emp {
-      display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700;
-      &-Active            { background: #dcfce7; color: #15803d; }
-      &-PendingActivation { background: #fef9c3; color: #854d0e; }
-      &-Inactive          { background: #f4f4f5; color: #71717a; }
-    }
     .owner-badge {
       display: inline-block; padding: 2px 8px; border-radius: 99px;
       font-size: 11px; font-weight: 700; background: #fce7f3; color: #9d174d;
     }
 
-    /* Buttons */
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 7px 16px; border-radius: 8px;
-      font-size: 12px; font-weight: 600; cursor: pointer;
-      border: 1px solid transparent; transition: all .15s;
-      &:disabled { opacity: .5; cursor: not-allowed; }
-    }
-    .btn-primary       { background: var(--color-brand); color: #fff; &:hover { opacity: .9; } }
-    .btn-warn          { background: #fffbeb; color: #b45309; border-color: #fde68a; &:hover { background: #fef3c7; } }
-    .btn-success       { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; &:hover { background: #dcfce7; } }
-    .btn-danger-outline{ background: #fef2f2; color: #b91c1c; border-color: #fecaca; &:hover { background: #fee2e2; } }
-    .btn-danger        { background: #dc2626; color: #fff; &:hover { background: #b91c1c; } }
-    .btn-ghost         { background: #f4f4f5; color: #555; border-color: #e8e8ec; &:hover { background: #ebebef; } }
-
-    /* Loading */
-    .loading-state { display: flex; justify-content: center; padding: 60px; }
-    .spin {
-      width: 32px; height: 32px; border-radius: 50%;
-      border: 3px solid #f0f0f3; border-top-color: var(--color-brand);
-      animation: spin .7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200;
-      display: flex; align-items: center; justify-content: center;
-      backdrop-filter: blur(3px);
-    }
-    .modal {
-      background: #fff; border-radius: 16px; padding: 32px 28px 24px;
-      width: 100%; max-width: 400px;
-      display: flex; flex-direction: column; align-items: center; gap: 12px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.2);
-      animation: scaleIn .15s ease;
-    }
-    @keyframes scaleIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .modal-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; &.warn { background: #fef3c7; color: #b45309; } }
-    .modal-title { font-size: 17px; font-weight: 700; color: #111; }
-    .modal-body  { font-size: 14px; color: #666; text-align: center; line-height: 1.6; strong { color: #111; } }
-    .modal-actions { display: flex; gap: 10px; width: 100%; margin-top: 8px; button { flex: 1; justify-content: center; } }
-
-    .empty-state { text-align: center; padding: 60px; color: #ccc; }
-
-    /* Tab badges */
-    .tab-badge {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 16px; height: 16px; border-radius: 99px; font-size: 10px; font-weight: 800;
-      margin-left: 5px; line-height: 1;
-    }
-    .tab-badge-danger { background: #fee2e2; color: #b91c1c; }
-    .tab-badge-warn   { background: #fef3c7; color: #b45309; font-size: 16px; height: 14px; }
+    /* Tab badges: variante maior para o indicador "aguardando" */
+    .tab-badge.tab-badge-warn { font-size: 16px; height: 14px; }
 
     /* Financeiro section */
     .fin-section { display: flex; flex-direction: column; gap: 20px; }
     .fin-empty {
       display: flex; flex-direction: column; align-items: center; gap: 12px;
       padding: 48px; color: #aaa; text-align: center;
-      svg { color: #ccc; }
+      lucide-icon { color: #ccc; }
       p { font-size: 14px; margin: 0; }
     }
 
@@ -869,62 +801,12 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
     .row-overdue td { background: rgba(220,38,38,.03); }
     .row-paid td { background: rgba(21,128,61,.02); }
 
-    /* Status badges */
-    .sub-badge {
-      display: inline-block; padding: 4px 12px; border-radius: 99px;
-      font-size: 12px; font-weight: 700; white-space: nowrap;
-    }
-    .sub-badge-EmDia              { background: #dcfce7; color: #15803d; }
-    .sub-badge-AguardandoPagamento{ background: #fef3c7; color: #b45309; }
-    .sub-badge-Inadimplente       { background: #fee2e2; color: #b91c1c; }
-    .sub-badge-SemFaturas         { background: #f4f4f5; color: #71717a; }
-
-    .inv-badge {
-      display: inline-block; padding: 2px 9px; border-radius: 99px;
-      font-size: 11px; font-weight: 700;
-    }
-    .inv-badge-Paid    { background: #dcfce7; color: #15803d; }
-    .inv-badge-Pending { background: #fef3c7; color: #b45309; }
-    .inv-badge-Overdue { background: #fee2e2; color: #b91c1c; }
-
     /* Drawer */
-    .drawer-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200;
-      display: flex; justify-content: flex-end; animation: fadeInDr .15s ease;
-    }
-    @keyframes fadeInDr { from{opacity:0} to{opacity:1} }
-    .drawer {
-      width: 400px; max-width: 95vw; background: #fff;
-      border-left: 1px solid #e8e8ec;
-      display: flex; flex-direction: column; height: 100vh; animation: slideInDr .2s ease;
-    }
-    @keyframes slideInDr { from{transform:translateX(40px);opacity:0} to{transform:translateX(0);opacity:1} }
-    .drawer-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 24px; border-bottom: 1px solid #e8e8ec;
-    }
-    .drawer-title { font-size: 16px; font-weight: 700; color: #111; margin: 0; }
-    .drawer-close {
-      width: 28px; height: 28px; border-radius: 6px; border: none;
-      background: transparent; color: #aaa; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      &:hover { background: #f0f0f3; }
-    }
-    .drawer-body { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
-    .drawer-footer {
-      padding: 16px 24px; border-top: 1px solid #e8e8ec;
-      display: flex; justify-content: flex-end; gap: 8px;
-    }
     .drawer-info-card {
       background: #f9f9fb; border: 1px solid #e8e8ec; border-radius: 10px; padding: 14px 16px;
     }
     .dic-name { font-size: 14px; font-weight: 600; color: #111; }
     .dic-sub  { font-size: 12px; color: #aaa; margin-top: 3px; }
-
-    .alert-warn-sm {
-      background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px;
-      padding: 10px 14px; font-size: 13px; color: #b45309;
-    }
 
     .input-group {
       display: flex; align-items: center;
@@ -945,12 +827,6 @@ const EMPLOYEE_STATUS_LABEL: Record<string, string> = {
 
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-label { font-size: 12px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: .5px; }
-    .form-control {
-      padding: 9px 12px; border: 1px solid #e8e8ec; border-radius: 8px;
-      background: #f9f9fb; color: #111; font-size: 13.5px; outline: none;
-      &:focus { border-color: var(--color-brand); }
-    }
-    textarea.form-control { resize: vertical; font-family: inherit; }
 
     @media (max-width: 768px) {
       .page { padding: 14px; max-width: 100%; }
@@ -975,6 +851,19 @@ export class TenantDetailComponent implements OnInit {
   private subSvc   = inject(SubscriptionService);
   private http     = inject(HttpClient);
   private toast    = inject(ToastService);
+
+  readonly ChevronLeft   = ChevronLeft;
+  readonly SquarePen     = SquarePen;
+  readonly MapPin        = MapPin;
+  readonly Clock         = Clock;
+  readonly Table         = Table;
+  readonly Layers        = Layers;
+  readonly Users         = Users;
+  readonly Sun           = Sun;
+  readonly DollarSign    = DollarSign;
+  readonly Check         = Check;
+  readonly X             = X;
+  readonly TriangleAlert = TriangleAlert;
 
   tenant    = signal<TenantDto | null>(null);
   loading   = signal(true);
@@ -1257,4 +1146,8 @@ export class TenantDetailComponent implements OnInit {
   daysLeft(d: string)            { return this.svc.daysUntil(d); }
   statusLabel(s: string)         { return STATUS_LABEL[s] ?? s; }
   employeeStatusLabel(s: string) { return EMPLOYEE_STATUS_LABEL[s] ?? s; }
+  statusBadgeClass(s: string)      { return STATUS_BADGE_CLASS[s] ?? 'badge-neutral'; }
+  empStatusBadgeClass(s: string)   { return EMPLOYEE_STATUS_BADGE_CLASS[s] ?? 'badge-neutral'; }
+  subStatusBadgeClass(s: string)   { return SUB_STATUS_BADGE_CLASS[s] ?? 'badge-neutral'; }
+  invStatusBadgeClass(s: string)   { return INV_STATUS_BADGE_CLASS[s] ?? 'badge-neutral'; }
 }

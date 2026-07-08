@@ -4,12 +4,19 @@ import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OwnerService, OwnerDetailDto, UpdateOwnerRequest } from '../owner.service';
 import { ToastService } from '../../../../core/toast/toast.service';
+import { LucideAngularModule, ChevronLeft, Plus, SquarePen, Mail, Check, TriangleAlert, Briefcase, X, CircleAlert, User, Phone, MapPin, FileText } from 'lucide-angular';
 
 const STATUS_LABEL: Record<string, string> = {
   Active: 'Ativo', PendingActivation: 'Aguardando ativação', Inactive: 'Inativo',
 };
 const TENANT_STATUS_LABEL: Record<string, string> = {
   Active: 'Ativo', TrialPeriod: 'Trial', Suspended: 'Suspenso', Cancelled: 'Cancelado',
+};
+const STATUS_BADGE_CLASS: Record<string, string> = {
+  Active: 'badge-success', PendingActivation: 'badge-warning', Inactive: 'badge-neutral',
+};
+const TENANT_STATUS_BADGE_CLASS: Record<string, string> = {
+  Active: 'badge-success', TrialPeriod: 'badge-info', Suspended: 'badge-warning', Cancelled: 'badge-neutral',
 };
 
 interface EditForm {
@@ -35,20 +42,20 @@ function emptyForm(): EditForm {
 @Component({
   selector: 'app-owner-detail',
   standalone: true,
-  imports: [DatePipe, CurrencyPipe, FormsModule],
+  imports: [DatePipe, CurrencyPipe, FormsModule, LucideAngularModule],
   template: `
     <div class="page">
 
       <div class="breadcrumb">
         <button class="back-btn" (click)="goBack()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          <lucide-icon [img]="ChevronLeft" [size]="14" [strokeWidth]="2"></lucide-icon>
           Clientes
         </button>
         @if (owner()) { <span class="sep">/</span> <span class="bc-current">{{ owner()!.name }}</span> }
       </div>
 
       @if (loading()) {
-        <div class="loading-state"><div class="spin"></div></div>
+        <div class="loading-state"><div class="spinner"></div></div>
       } @else if (!owner()) {
         <div class="empty-state">Cliente não encontrado.</div>
       } @else {
@@ -60,7 +67,7 @@ function emptyForm(): EditForm {
             <div>
               <div class="detail-name-row">
                 <h1 class="detail-name">{{ owner()!.name }}</h1>
-                <span class="badge badge-{{ owner()!.status }}">{{ statusLabel(owner()!.status) }}</span>
+                <span class="badge" [class]="statusBadgeClass(owner()!.status)">{{ statusLabel(owner()!.status) }}</span>
               </div>
               <div class="detail-sub">
                 <span>{{ owner()!.email }}</span>
@@ -70,16 +77,16 @@ function emptyForm(): EditForm {
           </div>
           <div class="header-actions">
             <button class="btn btn-primary" (click)="openCreateTenant()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <lucide-icon [img]="Plus" [size]="13" [strokeWidth]="2.5"></lucide-icon>
               Novo Estabelecimento
             </button>
             <button class="btn btn-ghost" (click)="openEdit()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              <lucide-icon [img]="SquarePen" [size]="13" [strokeWidth]="2"></lucide-icon>
               Editar
             </button>
             @if (owner()!.status === 'PendingActivation') {
               <button class="btn btn-ghost" (click)="doResend()" [disabled]="acting()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <lucide-icon [img]="Mail" [size]="13" [strokeWidth]="2"></lucide-icon>
                 {{ acting() === 'resend' ? 'Enviando…' : 'Reenviar ativação' }}
               </button>
             }
@@ -101,11 +108,11 @@ function emptyForm(): EditForm {
           <div class="resend-banner" [class.warn]="!resendInfo()!.emailSent">
             <div class="resend-banner-header">
               @if (resendInfo()!.emailSent) {
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <lucide-icon [img]="Check" [size]="16" [strokeWidth]="2.5"></lucide-icon>
                 <strong>E-mail de ativação enviado.</strong>
                 <span class="muted">Também disponível em:</span>
               } @else {
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <lucide-icon [img]="TriangleAlert" [size]="16" [strokeWidth]="2"></lucide-icon>
                 <strong>E-mail não pôde ser enviado.</strong>
                 <span class="muted">Envie este link manualmente ao cliente:</span>
               }
@@ -165,7 +172,7 @@ function emptyForm(): EditForm {
             <div><dt>E-mail</dt><dd>{{ owner()!.email }}</dd></div>
             <div><dt>Telefone</dt><dd>{{ owner()!.phone ? formatPhone(owner()!.phone!) : '—' }}</dd></div>
             <div><dt>Documento</dt><dd>{{ owner()!.documentNumber ? owner()!.documentType + ': ' + formatDoc(owner()!.documentNumber!, owner()!.documentType!) : '—' }}</dd></div>
-            <div><dt>Status</dt><dd><span class="badge badge-{{ owner()!.status }}">{{ statusLabel(owner()!.status) }}</span></dd></div>
+            <div><dt>Status</dt><dd><span class="badge" [class]="statusBadgeClass(owner()!.status)">{{ statusLabel(owner()!.status) }}</span></dd></div>
             <div><dt>Último acesso</dt><dd>{{ owner()!.lastLoginAt ? (owner()!.lastLoginAt | date:'dd/MM/yyyy HH:mm') : 'Nunca' }}</dd></div>
             <div><dt>Cadastrado em</dt><dd>{{ owner()!.createdAt | date:'dd/MM/yyyy' }}</dd></div>
           </div>
@@ -199,8 +206,8 @@ function emptyForm(): EditForm {
           </h2>
 
           @if (owner()!.tenants.length === 0) {
-            <div class="empty-tenants">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            <div class="empty-state empty-state--card">
+              <lucide-icon [img]="Briefcase" [size]="32" [strokeWidth]="1.5"></lucide-icon>
               <p>Nenhum estabelecimento vinculado.</p>
               <button class="btn btn-primary btn-sm" (click)="openCreateTenant()">Criar primeiro estabelecimento</button>
             </div>
@@ -222,7 +229,7 @@ function emptyForm(): EditForm {
                       <td class="td-name">{{ t.tenantName }}</td>
                       <td class="td-slug">{{ t.tenantSlug }}</td>
                       <td>{{ t.planName ?? '—' }}</td>
-                      <td><span class="badge badge-tenant-{{ t.status }}">{{ tenantStatusLabel(t.status) }}</span></td>
+                      <td><span class="badge" [class]="tenantStatusBadgeClass(t.status)">{{ tenantStatusLabel(t.status) }}</span></td>
                       <td>{{ t.planPrice !== null ? (t.planPrice | currency:'BRL':'symbol':'1.2-2') : '—' }}</td>
                     </tr>
                   }
@@ -237,18 +244,18 @@ function emptyForm(): EditForm {
 
     <!-- Drawer Editar -->
     @if (drawerOpen()) {
-      <div class="overlay" (click)="closeDrawer()"></div>
+      <div class="drawer-overlay" (click)="closeDrawer()"></div>
       <aside class="drawer">
         <div class="drawer-header">
           <h3 class="drawer-title">Editar cliente</h3>
           <button class="btn-close" (click)="closeDrawer()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <lucide-icon [img]="X" [size]="18" [strokeWidth]="2"></lucide-icon>
           </button>
         </div>
         <div class="drawer-body">
           @if (drawerError()) {
             <div class="alert-error">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <lucide-icon [img]="CircleAlert" [size]="14" [strokeWidth]="2.5"></lucide-icon>
               {{ drawerError() }}
             </div>
           }
@@ -256,7 +263,7 @@ function emptyForm(): EditForm {
           <!-- ── Identificação ── -->
           <div class="drawer-section">
             <div class="drawer-section-head">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <lucide-icon [img]="User" [size]="14" [strokeWidth]="2"></lucide-icon>
               Identificação
             </div>
             <div class="field">
@@ -273,7 +280,7 @@ function emptyForm(): EditForm {
           <!-- ── Contato e documento ── -->
           <div class="drawer-section">
             <div class="drawer-section-head">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <lucide-icon [img]="Phone" [size]="14" [strokeWidth]="2"></lucide-icon>
               Contato e documento
             </div>
             <div class="field-row">
@@ -306,7 +313,7 @@ function emptyForm(): EditForm {
           <!-- ── Endereço ── -->
           <div class="drawer-section">
             <div class="drawer-section-head">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <lucide-icon [img]="MapPin" [size]="14" [strokeWidth]="2"></lucide-icon>
               Endereço
               <span class="optional">opcional</span>
             </div>
@@ -354,7 +361,7 @@ function emptyForm(): EditForm {
           <!-- ── Notas ── -->
           <div class="drawer-section">
             <div class="drawer-section-head">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <lucide-icon [img]="FileText" [size]="14" [strokeWidth]="2"></lucide-icon>
               Notas internas
               <span class="optional">não visíveis ao cliente</span>
             </div>
@@ -374,15 +381,12 @@ function emptyForm(): EditForm {
     }
   `,
   styles: [`
+    :host { --drawer-width: 480px; }
     .page { padding: 24px 28px; max-width: 1100px; }
     .breadcrumb { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
     .back-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: #666; font-size: 13px; font-weight: 500; cursor: pointer; padding: 4px 6px; border-radius: 6px; &:hover { background: #f4f4f6; } }
     .sep { color: #ccc; }
     .bc-current { font-size: 13px; color: #111; font-weight: 500; }
-    .loading-state { display: flex; justify-content: center; padding: 80px; }
-    .spin { width: 28px; height: 28px; border: 3px solid #e8e8ec; border-top-color: var(--color-brand); border-radius: 50%; animation: spin .7s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .empty-state { text-align: center; padding: 80px; color: #aaa; }
 
     /* Header */
     .detail-header {
@@ -397,7 +401,7 @@ function emptyForm(): EditForm {
       font-size: 22px; font-weight: 800; flex-shrink: 0;
     }
     .detail-name-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .detail-name { font-size: 22px; font-weight: 700; color: #111; line-height: 1.2; }
+    .detail-name { line-height: 1.2; }
     .detail-sub { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 12px; color: #888; margin-top: 4px; }
     .dot { color: #ccc; }
     .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -454,27 +458,6 @@ function emptyForm(): EditForm {
     .row-clickable { cursor: pointer; transition: background .1s; &:hover td { background: #f9f9fb; } }
     .td-name { font-weight: 600; color: #111; }
     .td-slug { font-family: monospace; font-size: 12px; color: #888; }
-    .empty-tenants { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px; color: #ccc; background: #fff; border: 1px solid #e8e8ec; border-radius: 12px; p { font-size: 13px; margin: 0; } }
-
-    /* Badges */
-    .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; white-space: nowrap;
-      &-Active            { background: #dcfce7; color: #15803d; }
-      &-PendingActivation { background: #fef3c7; color: #b45309; }
-      &-Inactive          { background: #f4f4f5; color: #71717a; }
-      &-tenant-Active     { background: #dcfce7; color: #15803d; }
-      &-tenant-TrialPeriod{ background: #ede9fe; color: #7c3aed; }
-      &-tenant-Suspended  { background: #fef3c7; color: #b45309; }
-      &-tenant-Cancelled  { background: #f4f4f5; color: #71717a; }
-    }
-
-    /* Buttons */
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; &:disabled { opacity: .5; cursor: not-allowed; } }
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
-    .btn-primary { background: var(--color-brand); color: #fff; &:hover:not(:disabled) { opacity: .9; } }
-    .btn-ghost   { background: #fff; color: #555; border: 1px solid #e8e8ec; &:hover:not(:disabled) { background: #f7f7f9; border-color: #d0d0d8; color: #333; } }
-    .btn-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; &:hover:not(:disabled) { background: #bbf7d0; } }
-    .btn-warn    { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; &:hover:not(:disabled) { background: #fde68a; } }
-
     /* Resend banner */
     .resend-banner {
       margin-bottom: 22px;
@@ -488,7 +471,7 @@ function emptyForm(): EditForm {
       &.warn { background: #fffbeb; border-color: #fde68a; color: #92400e; }
     }
     .resend-banner-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .resend-banner-header svg { flex-shrink: 0; }
+    .resend-banner-header lucide-icon { flex-shrink: 0; }
     .resend-banner-header strong { font-size: 13px; }
     .resend-banner-header .muted { color: currentColor; opacity: .75; font-weight: 500; }
     .resend-link-row { display: flex; align-items: center; gap: 8px; }
@@ -510,20 +493,12 @@ function emptyForm(): EditForm {
     }
 
     /* Drawer */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 100; backdrop-filter: blur(2px); }
-    .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 480px; background: #fff; border-left: 1px solid #e8e8ec; z-index: 101; display: flex; flex-direction: column; box-shadow: -8px 0 32px rgba(0,0,0,.1); animation: slideIn .2s ease; }
-    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-    .drawer-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid #f0f0f3; }
-    .drawer-title { font-size: 16px; font-weight: 700; color: #111; }
-    .btn-close { width: 32px; height: 32px; border-radius: 8px; border: none; background: #f4f4f5; color: #666; display: flex; align-items: center; justify-content: center; cursor: pointer; &:hover { background: #ebebef; } }
-    .drawer-body { flex: 1; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
-    .drawer-footer { padding: 14px 22px; border-top: 1px solid #f0f0f3; display: flex; justify-content: flex-end; gap: 10px; }
     .field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
     .field-row { display: flex; gap: 12px; align-items: flex-start; }
     .field-label { font-size: 11px; font-weight: 600; color: #444; }
     .field-hint { font-size: 11px; color: #999; margin-top: 2px; line-height: 1.4; &.err { color: #b91c1c; } &.right { text-align: right; } }
     .field-input { padding: 10px 12px; border: 1px solid #e2e2e6; border-radius: 8px; font-size: 13px; outline: none; transition: border-color .15s, box-shadow .15s; font-family: inherit; background: #fff;
-      &:focus { border-color: var(--color-brand); box-shadow: 0 0 0 3px rgba(245,196,0,.12); }
+      &:focus { border-color: var(--color-brand); box-shadow: 0 0 0 3px rgba(var(--color-brand-rgb),.12); }
       &:disabled { background: #f7f7f9; color: #aaa; cursor: not-allowed; }
       &::placeholder { color: #c4c4c8; }
     }
@@ -532,11 +507,9 @@ function emptyForm(): EditForm {
     /* Section blocks */
     .drawer-section { background: #fafafa; border: 1px solid #f0f0f3; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
     .drawer-section-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #111; text-transform: uppercase; letter-spacing: .04em;
-      svg { color: var(--color-brand); flex-shrink: 0; }
+      lucide-icon { color: var(--color-brand); flex-shrink: 0; }
       .optional { margin-left: auto; font-size: 10px; font-weight: 600; color: #aaa; text-transform: none; letter-spacing: 0; }
     }
-
-    .alert-error { display: flex; align-items: center; gap: 8px; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 12px; font-size: 12px; font-weight: 500; }
   `]
 })
 export class OwnerDetailComponent implements OnInit {
@@ -544,6 +517,20 @@ export class OwnerDetailComponent implements OnInit {
   private router = inject(Router);
   private svc = inject(OwnerService);
   private toast = inject(ToastService);
+
+  readonly ChevronLeft = ChevronLeft;
+  readonly Plus = Plus;
+  readonly SquarePen = SquarePen;
+  readonly Mail = Mail;
+  readonly Check = Check;
+  readonly TriangleAlert = TriangleAlert;
+  readonly Briefcase = Briefcase;
+  readonly X = X;
+  readonly CircleAlert = CircleAlert;
+  readonly User = User;
+  readonly Phone = Phone;
+  readonly MapPin = MapPin;
+  readonly FileText = FileText;
 
   owner   = signal<OwnerDetailDto | null>(null);
   loading = signal(true);
@@ -579,6 +566,8 @@ export class OwnerDetailComponent implements OnInit {
   }
   statusLabel(s: string) { return STATUS_LABEL[s] ?? s; }
   tenantStatusLabel(s: string) { return TENANT_STATUS_LABEL[s] ?? s; }
+  statusBadgeClass(s: string) { return STATUS_BADGE_CLASS[s] ?? 'badge-neutral'; }
+  tenantStatusBadgeClass(s: string) { return TENANT_STATUS_BADGE_CLASS[s] ?? 'badge-neutral'; }
 
   formatPhone(v: string): string {
     const d = v.replace(/\D/g, '');

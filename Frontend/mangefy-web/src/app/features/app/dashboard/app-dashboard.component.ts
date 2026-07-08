@@ -11,6 +11,11 @@ import { AuthService } from '../../../core/auth/auth.service';
     </div>
   `,
   styles: [`
+    :host {
+      --color-brand: #f5c400;
+      --color-brand-hover: #d4a900;
+      --color-brand-rgb: 245, 196, 0;
+    }
     .dashboard-page {
       padding: 48px 32px;
       h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }

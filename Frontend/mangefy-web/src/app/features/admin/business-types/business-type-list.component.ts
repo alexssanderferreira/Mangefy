@@ -1,13 +1,14 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule, Plus, Hexagon, House, User, X, LoaderCircle } from 'lucide-angular';
 import { BusinessTypeService, BusinessTypeDto } from './business-type.service';
 import { ToastService } from '../../../core/toast/toast.service';
 
 @Component({
   selector: 'app-business-type-list',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, LucideAngularModule],
   template: `
     <div class="page">
 
@@ -18,20 +19,20 @@ import { ToastService } from '../../../core/toast/toast.service';
           <p class="page-subtitle">{{ items().length }} tipo{{ items().length !== 1 ? 's' : '' }} cadastrado{{ items().length !== 1 ? 's' : '' }}</p>
         </div>
         <button class="btn btn-primary" (click)="drawerOpen.set(true)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <lucide-icon [img]="Plus" [size]="14" [strokeWidth]="2.5"></lucide-icon>
           Novo Tipo
         </button>
       </div>
 
       <!-- Loading -->
       @if (loading()) {
-        <div class="loading-state"><div class="spin"></div></div>
+        <div class="loading-state"><div class="spinner"></div></div>
       }
 
       <!-- Empty -->
       @else if (items().length === 0) {
         <div class="empty-state">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          <lucide-icon [img]="Hexagon" [size]="40" [strokeWidth]="1.5"></lucide-icon>
           <p>Nenhum tipo de negócio cadastrado</p>
           <button class="btn btn-primary btn-sm" (click)="drawerOpen.set(true)">Criar primeiro tipo</button>
         </div>
@@ -44,7 +45,7 @@ import { ToastService } from '../../../core/toast/toast.service';
             <div class="bt-card" (click)="goToDetail(item.id)">
               <div class="bt-card-head">
                 <div class="bt-avatar">{{ item.name.charAt(0).toUpperCase() }}</div>
-                <span class="badge" [class.badge-active]="item.isActive" [class.badge-inactive]="!item.isActive">
+                <span class="badge" [class.badge-success]="item.isActive" [class.badge-neutral]="!item.isActive">
                   {{ item.isActive ? 'Ativo' : 'Inativo' }}
                 </span>
               </div>
@@ -56,11 +57,11 @@ import { ToastService } from '../../../core/toast/toast.service';
               }
               <div class="bt-footer">
                 <div class="bt-stat">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  <lucide-icon [img]="House" [size]="13" [strokeWidth]="2"></lucide-icon>
                   <span>{{ item.tenantCount }} tenant{{ item.tenantCount !== 1 ? 's' : '' }}</span>
                 </div>
                 <div class="bt-stat">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  <lucide-icon [img]="User" [size]="13" [strokeWidth]="2"></lucide-icon>
                   <span>{{ item.roleTemplates.length }} template{{ item.roleTemplates.length !== 1 ? 's' : '' }}</span>
                 </div>
               </div>
@@ -77,22 +78,22 @@ import { ToastService } from '../../../core/toast/toast.service';
         <div class="drawer-header">
           <div class="drawer-header-left">
             <div class="drawer-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              <lucide-icon [img]="Hexagon" [size]="16" [strokeWidth]="2"></lucide-icon>
             </div>
             <div>
               <h2 class="drawer-title">Novo Tipo de Negócio</h2>
               <p class="drawer-subtitle">Define o modelo de operação do tenant</p>
             </div>
           </div>
-          <button class="drawer-close" (click)="closeDrawer()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <button class="btn-close" (click)="closeDrawer()">
+            <lucide-icon [img]="X" [size]="16" [strokeWidth]="2"></lucide-icon>
           </button>
         </div>
 
         <div class="drawer-body">
           <div class="form-section">
             <div class="form-section-header">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              <lucide-icon [img]="Hexagon" [size]="12" [strokeWidth]="2.5"></lucide-icon>
               Dados
             </div>
             <div class="field">
@@ -110,7 +111,7 @@ import { ToastService } from '../../../core/toast/toast.service';
           <button class="btn btn-ghost" (click)="closeDrawer()">Cancelar</button>
           <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
             @if (saving()) {
-              <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              <lucide-icon [img]="LoaderCircle" [size]="14" [strokeWidth]="2.5" class="icon-spin"></lucide-icon>
               Salvando...
             } @else { Criar Tipo }
           </button>
@@ -122,7 +123,6 @@ import { ToastService } from '../../../core/toast/toast.service';
     .page { padding: 24px 28px; max-width: 1200px; }
 
     .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 12px; }
-    .page-title  { font-size: 22px; font-weight: 700; color: #111; }
     .page-subtitle { font-size: 13px; color: #aaa; margin-top: 3px; }
 
     /* Grid de cards */
@@ -166,67 +166,11 @@ import { ToastService } from '../../../core/toast/toast.service';
     .bt-stat {
       display: flex; align-items: center; gap: 5px;
       font-size: 12px; color: #888; font-weight: 500;
-      svg { color: #aaa; }
+      lucide-icon { color: #aaa; }
     }
-
-    .badge {
-      display: inline-block; padding: 3px 10px; border-radius: 99px;
-      font-size: 11px; font-weight: 700;
-      &-active   { background: #dcfce7; color: #15803d; }
-      &-inactive { background: #f4f4f5; color: #71717a; }
-    }
-
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 16px; border-radius: 8px;
-      font-size: 13px; font-weight: 600; cursor: pointer;
-      border: 1px solid transparent; transition: all .15s;
-      &:disabled { opacity: .5; cursor: not-allowed; }
-    }
-    .btn-primary { background: var(--color-brand); color: #fff; &:hover { opacity: .9; } }
-    .btn-ghost   { background: #f4f4f5; color: #555; border-color: #e8e8ec; &:hover { background: #ebebef; } }
-    .btn-sm      { padding: 6px 14px; font-size: 12px; }
-
-    .loading-state { display: flex; justify-content: center; padding: 60px; }
-    .spin {
-      width: 32px; height: 32px; border-radius: 50%;
-      border: 3px solid #f0f0f3; border-top-color: var(--color-brand);
-      animation: spin .7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .empty-state {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 12px; padding: 80px 20px; color: #ccc;
-      p { font-size: 14px; color: #999; }
-      svg { color: #ddd; }
-    }
-
-    /* Drawer */
-    .drawer-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100;
-      backdrop-filter: blur(2px); animation: fadeIn .15s ease;
-    }
-    .drawer {
-      position: fixed; top: 0; right: 0; bottom: 0; width: 420px;
-      background: #fff; z-index: 101; display: flex; flex-direction: column;
-      box-shadow: -8px 0 40px rgba(0,0,0,.12);
-      animation: slideIn .2s ease;
-    }
-    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-
-    .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #f0f0f3; }
-    .drawer-header-left { display: flex; align-items: center; gap: 12px; }
-    .drawer-icon { width: 36px; height: 36px; border-radius: 10px; background: color-mix(in srgb, var(--color-brand) 10%, transparent); color: var(--color-brand); display: flex; align-items: center; justify-content: center; }
-    .drawer-title { font-size: 15px; font-weight: 700; color: #111; }
-    .drawer-subtitle { font-size: 11px; color: #aaa; margin-top: 1px; }
-    .drawer-close { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid #e8e8ec; background: #fff; border-radius: 7px; cursor: pointer; color: #888; transition: all .15s; &:hover { background: #f4f4f5; color: #333; } }
-    .drawer-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
-    .drawer-footer { padding: 14px 20px; border-top: 1px solid #f0f0f3; display: flex; gap: 8px; justify-content: flex-end; background: #fafafa; }
 
     .form-section { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: #fafafa; border: 1px solid #f0f0f3; border-radius: 10px; }
-    .form-section-header { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #999; svg { color: var(--color-brand); } }
+    .form-section-header { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #999; lucide-icon { color: var(--color-brand); } }
 
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field-label { font-size: 11px; font-weight: 600; color: #666; }
@@ -239,8 +183,6 @@ import { ToastService } from '../../../core/toast/toast.service';
       &::placeholder { color: #ccc; }
     }
     .field-textarea { resize: vertical; min-height: 80px; font-family: inherit; }
-    @keyframes spinAnim { to { transform: rotate(360deg); } }
-    .spin-icon { animation: spinAnim .8s linear infinite; transform-origin: center; }
 
     @media (max-width: 768px) {
       .page { padding: 14px; max-width: 100%; }
@@ -253,6 +195,13 @@ export class BusinessTypeListComponent implements OnInit {
   private svc    = inject(BusinessTypeService);
   private router = inject(Router);
   private toast  = inject(ToastService);
+
+  readonly Plus = Plus;
+  readonly Hexagon = Hexagon;
+  readonly House = House;
+  readonly User = User;
+  readonly X = X;
+  readonly LoaderCircle = LoaderCircle;
 
   items      = signal<BusinessTypeDto[]>([]);
   loading    = signal(true);

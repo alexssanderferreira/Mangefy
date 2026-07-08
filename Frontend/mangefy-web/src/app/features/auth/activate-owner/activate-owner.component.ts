@@ -49,6 +49,7 @@ import { environment } from '../../../../environments/environment';
     </div>
   `,
   styles: [`
+    :host { --accent: #f5c400; --accent-dark: #d4a900; }
     .activate-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f6f7fb; padding: 24px; }
     .card { background: #fff; border-radius: 16px; padding: 40px; max-width: 460px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
     .brand { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
@@ -59,12 +60,13 @@ import { environment } from '../../../../environments/environment';
     .field { margin-bottom: 16px; }
     .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
     .field input { width: 100%; padding: 10px 12px; border: 1px solid #d4d4d8; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
-    .field input:focus { outline: none; border-color: #6366f1; }
-    button { width: 100%; padding: 12px; background: #6366f1; color: #fff; border: 0; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,196,0,.12); }
+    button { width: 100%; padding: 12px; background: #0a0a0a; color: var(--accent); border: 0; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background .15s; }
+    button:hover:not(:disabled) { background: #222; }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
     .alert-error { background: #fef2f2; color: #b91c1c; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
     .alert-success { background: #f0fdf4; color: #15803d; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
-    .back { display: block; text-align: center; margin-top: 16px; color: #6366f1; text-decoration: none; font-size: 13px; }
+    .back { display: block; text-align: center; margin-top: 16px; color: var(--accent-dark); text-decoration: none; font-size: 13px; }
   `]
 })
 export class ActivateOwnerComponent {

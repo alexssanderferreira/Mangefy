@@ -6,6 +6,10 @@ import { TenantService, TenantDto } from '../tenants/services/tenant.service';
 import { PlansService, PlanDto } from '../plans/plans.service';
 import { SubscriptionService } from '../subscriptions/subscription.service';
 import { OwnerService } from '../owners/owner.service';
+import {
+  LucideAngularModule, X, Check, TriangleAlert, ChevronRight, RefreshCw,
+  House, TrendingUp, ChartNoAxesColumn, EllipsisVertical
+} from 'lucide-angular';
 
 type Filter = 'all' | 'Active' | 'TrialPeriod' | 'Suspended' | 'Cancelled';
 
@@ -15,7 +19,7 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, DatePipe, NgClass, TitleCasePipe, DecimalPipe],
+  imports: [RouterLink, DatePipe, NgClass, TitleCasePipe, DecimalPipe, LucideAngularModule],
   template: `
     <div class="page">
 
@@ -28,7 +32,7 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
         <div class="header-actions">
           @if (activeFilter() !== 'all') {
             <button class="clear-filter" (click)="setFilter('all')">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <lucide-icon [img]="X" [size]="12" [strokeWidth]="2.5"></lucide-icon>
               Limpar filtro
             </button>
           }
@@ -36,7 +40,7 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
             <span class="last-updated">Atualizado às {{ lastUpdated() | date:'HH:mm' }}</span>
           }
           <button class="reload-btn" (click)="reload()" [disabled]="loading()" title="Recarregar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" [class.spinning]="loading()"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+            <lucide-icon [img]="RefreshCw" [size]="14" [strokeWidth]="2.5" [class.spinning]="loading()"></lucide-icon>
           </button>
         </div>
       </div>
@@ -46,12 +50,12 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
         <div class="attention-band">
           @if (actionItems().length === 0) {
             <div class="all-ok">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <lucide-icon [img]="Check" [size]="14" [strokeWidth]="2.5"></lucide-icon>
               Tudo em ordem — nenhuma ação pendente
             </div>
           } @else {
             <span class="attention-label">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <lucide-icon [img]="TriangleAlert" [size]="13" [strokeWidth]="2.5"></lucide-icon>
               Requer atenção
             </span>
             <div class="attention-chips">
@@ -60,7 +64,7 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
                         (click)="router.navigate([item.route], { queryParams: item.params })">
                   <span class="att-count">{{ item.count }}</span>
                   <span class="att-label">{{ item.label }}</span>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                  <lucide-icon [img]="ChevronRight" [size]="11" [strokeWidth]="2.5"></lucide-icon>
                 </button>
               }
             </div>
@@ -86,16 +90,16 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
                   <div class="kpi-icon">
                     @switch (c.icon) {
                       @case ('home') {
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                        <lucide-icon [img]="House" [size]="15" [strokeWidth]="2"></lucide-icon>
                       }
                       @case ('trending') {
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                        <lucide-icon [img]="TrendingUp" [size]="15" [strokeWidth]="2"></lucide-icon>
                       }
                       @case ('chart') {
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        <lucide-icon [img]="ChartNoAxesColumn" [size]="15" [strokeWidth]="2"></lucide-icon>
                       }
                       @case ('alert') {
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                        <lucide-icon [img]="TriangleAlert" [size]="15" [strokeWidth]="2"></lucide-icon>
                       }
                     }
                   </div>
@@ -181,11 +185,11 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
                         </div>
                       </td>
                       <td class="mono">{{ planName(t.planId) }}</td>
-                      <td><span class="sbadge" [ngClass]="statusClass(t.status)">{{ statusLabel(t.status) }}</span></td>
+                      <td><span class="badge" [ngClass]="statusClass(t.status)">{{ statusLabel(t.status) }}</span></td>
                       <td class="muted">{{ t.createdAt | date:'dd/MM/yyyy' }}</td>
                       <td class="action-col">
                         <button class="row-menu" (click)="$event.stopPropagation()">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+                          <lucide-icon [img]="EllipsisVertical" [size]="14" [strokeWidth]="2"></lucide-icon>
                         </button>
                       </td>
                     </tr>
@@ -194,7 +198,7 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
               </table>
             } @else {
               <div class="empty-state">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                <lucide-icon [img]="House" [size]="36" [strokeWidth]="1.5"></lucide-icon>
                 <p>Nenhum estabelecimento encontrado</p>
               </div>
             }
@@ -282,7 +286,7 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
       </div>
 
       @if (error()) {
-        <div class="err-bar">{{ error() }}</div>
+        <div class="alert-error">{{ error() }}</div>
       }
     </div>
   `,
@@ -291,7 +295,6 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
 
     /* Header */
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .page-title  { font-size: 22px; font-weight: 700; color: #111; }
     .page-subtitle { font-size: 12px; color: #aaa; margin-top: 2px; }
     .header-actions { display: flex; align-items: center; gap: 8px; }
     .last-updated { font-size: 11px; color: #bbb; white-space: nowrap; }
@@ -542,14 +545,6 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
       &:hover { background: #f0f0f3; color: #555; }
     }
 
-    .sbadge {
-      display: inline-flex; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 700;
-      &.active    { background: #dcfce7; color: #15803d; }
-      &.trial     { background: #dbeafe; color: #1d4ed8; }
-      &.suspended { background: #fef3c7; color: #b45309; }
-      &.cancelled { background: #f4f4f5; color: #71717a; }
-    }
-
     /* Skeleton */
     .skel-val  { display: block; width: 60px; height: 28px; background: #f0f0f3; border-radius: 6px; animation: pulse 1.4s infinite; }
     .skel-rows { display: flex; flex-direction: column; gap: 8px; }
@@ -558,7 +553,6 @@ function endOf(y: number, m: number)   { return new Date(y, m + 1, 0, 23, 59, 59
 
     .empty-state { display: flex; flex-direction: column; align-items: center; padding: 36px 0; gap: 10px; color: #ddd; p { font-size: 13px; color: #bbb; } }
     .no-data     { font-size: 12px; color: #ccc; text-align: center; padding: 8px 0; }
-    .err-bar     { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 10px; padding: 12px 14px; font-size: 13px; margin-top: 16px; }
   `]
 })
 export class DashboardComponent implements OnInit {
@@ -567,6 +561,16 @@ export class DashboardComponent implements OnInit {
   subscriptionSvc = inject(SubscriptionService);
   ownerSvc       = inject(OwnerService);
   router         = inject(Router);
+
+  readonly X = X;
+  readonly Check = Check;
+  readonly TriangleAlert = TriangleAlert;
+  readonly ChevronRight = ChevronRight;
+  readonly RefreshCw = RefreshCw;
+  readonly House = House;
+  readonly TrendingUp = TrendingUp;
+  readonly ChartNoAxesColumn = ChartNoAxesColumn;
+  readonly EllipsisVertical = EllipsisVertical;
 
   today   = new Date();
   loading = signal(true);
@@ -795,7 +799,7 @@ export class DashboardComponent implements OnInit {
     return ({ Active: 'Ativo', TrialPeriod: 'Trial', Suspended: 'Suspenso', Cancelled: 'Cancelado' } as any)[s] ?? s;
   }
   statusClass(s: string) {
-    return ({ Active: 'active', TrialPeriod: 'trial', Suspended: 'suspended', Cancelled: 'cancelled' } as any)[s] ?? '';
+    return ({ Active: 'badge-success', TrialPeriod: 'badge-info', Suspended: 'badge-warning', Cancelled: 'badge-neutral' } as any)[s] ?? 'badge-neutral';
   }
   daysClass(date: string) {
     const d = this.svc.daysUntil(date);

@@ -4,6 +4,10 @@ import { PlansService, PlanDto } from '../plans/plans.service';
 import { BusinessTypeService, BusinessTypeDto } from '../business-types/business-type.service';
 import { FeatureMatrixService, PlanFeatureSetDto } from './feature-matrix.service';
 import { ToastService } from '../../../core/toast/toast.service';
+import {
+  LucideAngularModule, LoaderCircle, FileText, Menu, Monitor, Package,
+  CreditCard, ChartNoAxesColumn, Calendar, Truck, Users, Check, Save, LayoutGrid
+} from 'lucide-angular';
 
 // ── Feature catalog mirroring FeatureCatalog.cs ──────────────────────────────
 interface FeatureGroup {
@@ -74,7 +78,7 @@ const FEATURE_GROUPS: FeatureGroup[] = [
 @Component({
   selector: 'app-feature-matrix',
   standalone: true,
-  imports: [],
+  imports: [LucideAngularModule],
   template: `
     <div class="page">
 
@@ -98,7 +102,7 @@ const FEATURE_GROUPS: FeatureGroup[] = [
           }
         </div>
         @if (loadingMatrix()) {
-          <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          <lucide-icon class="spin-icon" [img]="LoaderCircle" [size]="14" [strokeWidth]="2.5"></lucide-icon>
         }
       </div>
 
@@ -131,31 +135,31 @@ const FEATURE_GROUPS: FeatureGroup[] = [
                     <div class="group-header">
                       @switch (group.icon) {
                           @case ('receipt') {
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            <lucide-icon [img]="FileText" [size]="11" [strokeWidth]="2.5"></lucide-icon>
                           }
                           @case ('menu') {
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                            <lucide-icon [img]="Menu" [size]="11" [strokeWidth]="2.5"></lucide-icon>
                           }
                           @case ('kds') {
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                            <lucide-icon [img]="Monitor" [size]="11" [strokeWidth]="2.5"></lucide-icon>
                           }
                           @case ('stock') {
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                            <lucide-icon [img]="Package" [size]="11" [strokeWidth]="2.5"></lucide-icon>
                           }
                           @case ('cash') {
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                            <lucide-icon [img]="CreditCard" [size]="11" [strokeWidth]="2.5"></lucide-icon>
                           }
                           @case ('reports') {
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                            <lucide-icon [img]="ChartNoAxesColumn" [size]="11" [strokeWidth]="2.5"></lucide-icon>
                           }
                           @case ('reservation') {
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <lucide-icon [img]="Calendar" [size]="11" [strokeWidth]="2.5"></lucide-icon>
                           }
                           @case ('delivery') {
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="1"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/></svg>
+                            <lucide-icon [img]="Truck" [size]="11" [strokeWidth]="2.5"></lucide-icon>
                           }
                           @case ('roles') {
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            <lucide-icon [img]="Users" [size]="11" [strokeWidth]="2.5"></lucide-icon>
                           }
                         }
                       {{ group.label }}
@@ -182,7 +186,7 @@ const FEATURE_GROUPS: FeatureGroup[] = [
                           />
                           <div class="check-box" [class.checked]="isEnabled(bt.id, feat.key)">
                             @if (isEnabled(bt.id, feat.key)) {
-                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                              <lucide-icon [img]="Check" [size]="10" [strokeWidth]="3"></lucide-icon>
                             }
                           </div>
                         </label>
@@ -210,10 +214,10 @@ const FEATURE_GROUPS: FeatureGroup[] = [
             }
             <button class="btn-primary" [disabled]="dirtyCount() === 0 || saving()" (click)="saveAll()">
               @if (saving()) {
-                <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <lucide-icon class="spin-icon" [img]="LoaderCircle" [size]="14" [strokeWidth]="2.5"></lucide-icon>
                 Salvando...
               } @else {
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <lucide-icon [img]="Save" [size]="14" [strokeWidth]="2.5"></lucide-icon>
                 Salvar Alterações
               }
             </button>
@@ -223,7 +227,7 @@ const FEATURE_GROUPS: FeatureGroup[] = [
 
       @if (!loading() && !selectedPlanId()) {
         <div class="empty-state">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <lucide-icon [img]="LayoutGrid" [size]="40" [strokeWidth]="1.5"></lucide-icon>
           <p>Nenhum plano cadastrado. Crie um plano primeiro.</p>
         </div>
       }
@@ -283,7 +287,7 @@ const FEATURE_GROUPS: FeatureGroup[] = [
       display: flex; align-items: center; gap: 6px;
       font-size: 10px; font-weight: 700; text-transform: uppercase;
       letter-spacing: .07em; color: #999;
-      svg { color: var(--color-brand); }
+      lucide-icon { color: var(--color-brand); }
     }
 
     /* Feature row */
@@ -368,6 +372,20 @@ export class FeatureMatrixComponent implements OnInit {
   private toast     = inject(ToastService);
 
   readonly featureGroups = FEATURE_GROUPS;
+
+  readonly LoaderCircle = LoaderCircle;
+  readonly FileText = FileText;
+  readonly Menu = Menu;
+  readonly Monitor = Monitor;
+  readonly Package = Package;
+  readonly CreditCard = CreditCard;
+  readonly ChartNoAxesColumn = ChartNoAxesColumn;
+  readonly Calendar = Calendar;
+  readonly Truck = Truck;
+  readonly Users = Users;
+  readonly Check = Check;
+  readonly Save = Save;
+  readonly LayoutGrid = LayoutGrid;
 
   loading       = signal(true);
   loadingMatrix = signal(false);

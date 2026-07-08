@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { LucideAngularModule, type LucideIconData, LayoutGrid, User, Home, Star, DollarSign, TriangleAlert, Box, Truck, LogOut } from 'lucide-angular';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LayoutService } from './layout.service';
 import { SubscriptionService } from '../subscriptions/subscription.service';
@@ -8,7 +8,7 @@ import { SubscriptionService } from '../subscriptions/subscription.service';
 interface NavItem {
   label: string;
   route: string;
-  icon: SafeHtml;
+  icon: LucideIconData;
   badge?: number;
   queryParams?: Record<string, string>;
 }
@@ -21,7 +21,7 @@ interface NavGroup {
 @Component({
   selector: 'app-admin-sidebar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, LucideAngularModule],
   template: `
     <aside class="sidebar">
 
@@ -44,7 +44,7 @@ interface NavGroup {
             @for (item of group.items; track item.route) {
               <a class="nav-item" [routerLink]="['/admin', item.route]" [queryParams]="item.queryParams ?? {}" routerLinkActive="active" (click)="layout.close()">
                 <span class="nav-item-left">
-                  <span class="nav-icon" [innerHTML]="item.icon"></span>
+                  <span class="nav-icon"><lucide-icon [img]="item.icon" [size]="15"></lucide-icon></span>
                   <span class="nav-label">{{ item.label }}</span>
                 </span>
                 @if (item.route === 'overdue' && overdueCount() > 0) {
@@ -68,11 +68,7 @@ interface NavGroup {
           </div>
         </div>
         <button class="btn-logout" (click)="logout()" title="Sair">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
+          <lucide-icon [img]="LogOut" [size]="15"></lucide-icon>
         </button>
       </div>
 
@@ -118,9 +114,9 @@ interface NavGroup {
     .logo-badge {
       font-size: 9px;
       font-weight: 700;
-      background: rgba(224,49,49,.2);
+      background: rgba(var(--color-brand-rgb),.2);
       color: var(--color-brand);
-      border: 1px solid rgba(224,49,49,.3);
+      border: 1px solid rgba(var(--color-brand-rgb),.3);
       padding: 2px 7px;
       border-radius: 4px;
       letter-spacing: .6px;
@@ -167,7 +163,7 @@ interface NavGroup {
       }
 
       &.active {
-        background: rgba(224,49,49,.15);
+        background: rgba(var(--color-brand-rgb),.15);
         color: #fff;
         font-weight: 600;
 
@@ -271,9 +267,10 @@ interface NavGroup {
 })
 export class AdminSidebarComponent implements OnInit {
   private auth      = inject(AuthService);
-  private sanitizer = inject(DomSanitizer);
   private subscriptionSvc = inject(SubscriptionService);
   layout = inject(LayoutService);
+
+  readonly LogOut = LogOut;
 
   overdueCount = signal(0);
 
@@ -287,60 +284,29 @@ export class AdminSidebarComponent implements OnInit {
     });
   }
 
-  private svg(html: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(html);
-  }
-
   navGroups: NavGroup[] = [
     {
       label: 'Principal',
       items: [
-        {
-          label: 'Dashboard', route: 'dashboard',
-          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`)
-        },
-        {
-          label: 'Responsáveis', route: 'owners',
-          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`)
-        },
-        {
-          label: 'Estabelecimentos', route: 'tenants',
-          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`)
-        },
-        {
-          label: 'Planos', route: 'plans',
-          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`)
-        },
+        { label: 'Dashboard', route: 'dashboard', icon: LayoutGrid },
+        { label: 'Responsáveis', route: 'owners', icon: User },
+        { label: 'Estabelecimentos', route: 'tenants', icon: Home },
+        { label: 'Planos', route: 'plans', icon: Star },
       ]
     },
     {
       label: 'Financeiro',
       items: [
-        {
-          label: 'Assinaturas', route: 'subscriptions',
-          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`)
-        },
-        {
-          label: 'Inadimplências', route: 'overdue',
-          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`)
-        },
+        { label: 'Assinaturas', route: 'subscriptions', icon: DollarSign },
+        { label: 'Inadimplências', route: 'overdue', icon: TriangleAlert },
       ]
     },
     {
       label: 'Configuração',
       items: [
-        {
-          label: 'Tipos de Negócio', route: 'business-types',
-          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`)
-        },
-        {
-          label: 'Fornecedores', route: 'suppliers',
-          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`)
-        },
-        {
-          label: 'Matriz de Features', route: 'feature-matrix',
-          icon: this.svg(`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`)
-        },
+        { label: 'Tipos de Negócio', route: 'business-types', icon: Box },
+        { label: 'Fornecedores', route: 'suppliers', icon: Truck },
+        { label: 'Matriz de Features', route: 'feature-matrix', icon: LayoutGrid },
       ]
     },
   ];

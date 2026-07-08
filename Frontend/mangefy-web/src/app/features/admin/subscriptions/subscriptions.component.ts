@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { LucideAngularModule, CircleAlert, Search, DollarSign, Check, X, TriangleAlert } from 'lucide-angular';
 import { SubscriptionService, SubscriptionDto, InvoiceDto } from './subscription.service';
 import { ToastService } from '../../../core/toast/toast.service';
 
@@ -10,7 +11,7 @@ type DrawerMode = 'invoice' | 'payment' | null;
 @Component({
   selector: 'app-subscriptions',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, LucideAngularModule],
   template: `
     <div class="page">
 
@@ -23,19 +24,19 @@ type DrawerMode = 'invoice' | 'payment' | null;
 
       @if (error()) {
         <div class="alert-error">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <lucide-icon [img]="CircleAlert" [size]="15" [strokeWidth]="2"></lucide-icon>
           {{ error() }}
         </div>
       }
 
       @if (loading()) {
-        <div class="skel-rows">@for (i of [1,2,3,4,5]; track i) { <div class="skel-row"></div> }</div>
+        <div class="skel-rows">@for (i of [1,2,3,4,5]; track i) { <div class="skeleton-row" style="height:48px"></div> }</div>
       }
 
       @if (!loading()) {
         <div class="filter-bar">
           <div class="search-wrap">
-            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <lucide-icon [img]="Search" [size]="14" [strokeWidth]="2" class="search-icon"></lucide-icon>
             <input class="search-input" type="text" placeholder="Buscar estabelecimento..." [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" />
           </div>
           <select class="filter-select" [value]="filterStatus()" (change)="filterStatus.set($any($event.target).value)">
@@ -93,12 +94,12 @@ type DrawerMode = 'invoice' | 'payment' | null;
                     <div class="row-actions" (click)="$event.stopPropagation()">
                       @if (!openInvoice(s)) {
                         <button class="btn-icon" title="Gerar fatura" (click)="openInvoiceDrawer(s)">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                          <lucide-icon [img]="DollarSign" [size]="14" [strokeWidth]="2"></lucide-icon>
                         </button>
                       }
                       @if (openInvoice(s)) {
                         <button class="btn-icon btn-icon-success" title="Confirmar pagamento" (click)="openPaymentDrawer(s)">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                          <lucide-icon [img]="Check" [size]="14" [strokeWidth]="2"></lucide-icon>
                         </button>
                       }
                     </div>
@@ -118,8 +119,8 @@ type DrawerMode = 'invoice' | 'payment' | null;
         <div class="drawer" (click)="$event.stopPropagation()">
           <div class="drawer-header">
             <h2 class="drawer-title">Gerar Fatura</h2>
-            <button class="drawer-close" (click)="closeDrawer()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <button class="btn-close" (click)="closeDrawer()">
+              <lucide-icon [img]="X" [size]="16" [strokeWidth]="2"></lucide-icon>
             </button>
           </div>
           <div class="drawer-body">
@@ -158,8 +159,8 @@ type DrawerMode = 'invoice' | 'payment' | null;
         <div class="drawer" (click)="$event.stopPropagation()">
           <div class="drawer-header">
             <h2 class="drawer-title">Confirmar Pagamento</h2>
-            <button class="drawer-close" (click)="closeDrawer()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <button class="btn-close" (click)="closeDrawer()">
+              <lucide-icon [img]="X" [size]="16" [strokeWidth]="2"></lucide-icon>
             </button>
           </div>
           <div class="drawer-body">
@@ -172,7 +173,7 @@ type DrawerMode = 'invoice' | 'payment' | null;
             </div>
             @if (selected()!.overdueCount > 0) {
               <div class="alert-warn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <lucide-icon [img]="TriangleAlert" [size]="14" [strokeWidth]="2"></lucide-icon>
                 Esta assinatura tem {{ selected()!.overdueCount }} fatura{{ selected()!.overdueCount !== 1 ? 's' : '' }} em atraso. O pagamento será aplicado à mais antiga.
               </div>
             }
@@ -206,24 +207,9 @@ type DrawerMode = 'invoice' | 'payment' | null;
   styles: [`
     .page { padding: 28px 32px; max-width: 1200px; }
     .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-    .page-title { font-size: 22px; font-weight: 700; color: var(--text-primary); margin: 0 0 4px; }
     .page-subtitle { font-size: 13px; color: var(--text-muted); margin: 0; }
 
-    .alert-error {
-      display: flex; align-items: center; gap: 8px;
-      background: rgba(224,49,49,.1); border: 1px solid rgba(224,49,49,.3);
-      color: var(--color-danger); border-radius: 8px; padding: 10px 14px;
-      font-size: 13px; margin-bottom: 16px;
-    }
-    .alert-warn {
-      display: flex; align-items: flex-start; gap: 8px;
-      background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3);
-      color: #d97706; border-radius: 8px; padding: 10px 14px; font-size: 13px;
-    }
-
     .skel-rows { display: flex; flex-direction: column; gap: 8px; }
-    .skel-row { height: 48px; background: var(--surface-bg); border-radius: 8px; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
 
     .filter-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
     .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 320px; }
@@ -259,49 +245,8 @@ type DrawerMode = 'invoice' | 'payment' | null;
     .due-label { font-size: 12px; color: var(--text-muted); margin-left: 2px; }
 
     .row-actions { display: flex; gap: 4px; }
-    .btn-icon {
-      width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--surface-border);
-      background: transparent; color: var(--text-muted); cursor: pointer;
-      display: flex; align-items: center; justify-content: center; transition: background .12s, color .12s;
-      &:hover { background: var(--surface-bg); color: var(--text-primary); }
-    }
     .btn-icon-success { color: #25a265; border-color: rgba(37,162,101,.3); background: rgba(37,162,101,.06);
       &:hover { background: rgba(37,162,101,.12); } }
-
-    .badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
-    .badge-em-dia { background: rgba(37,162,101,.12); color: #25a265; }
-    .badge-aguardando { background: rgba(245,158,11,.12); color: #d97706; }
-    .badge-inadimplente { background: rgba(224,49,49,.12); color: var(--color-danger); }
-    .badge-sem-faturas { background: var(--surface-bg); color: var(--text-muted); border: 1px solid var(--surface-border); }
-
-    /* Drawer */
-    .drawer-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.4);
-      display: flex; justify-content: flex-end; z-index: 200; animation: fadeIn .15s ease;
-    }
-    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-    .drawer {
-      width: 400px; max-width: 95vw; background: var(--surface-card);
-      border-left: 1px solid var(--surface-border);
-      display: flex; flex-direction: column; height: 100vh; animation: slideIn .2s ease;
-    }
-    @keyframes slideIn { from{transform:translateX(40px);opacity:0} to{transform:translateX(0);opacity:1} }
-    .drawer-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 24px; border-bottom: 1px solid var(--surface-border);
-    }
-    .drawer-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0; }
-    .drawer-close {
-      width: 28px; height: 28px; border-radius: 6px; border: none;
-      background: transparent; color: var(--text-muted); cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      &:hover { background: var(--surface-bg); }
-    }
-    .drawer-body { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
-    .drawer-footer {
-      padding: 16px 24px; border-top: 1px solid var(--surface-border);
-      display: flex; justify-content: flex-end; gap: 8px;
-    }
 
     .info-card {
       background: var(--surface-bg); border: 1px solid var(--surface-border);
@@ -335,16 +280,19 @@ type DrawerMode = 'invoice' | 'payment' | null;
       &:focus { border-color: var(--color-brand); }
     }
     textarea.form-control { resize: vertical; font-family: inherit; }
-
-    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: opacity .15s; &:disabled{opacity:.5;cursor:not-allowed;} }
-    .btn-primary { background: var(--color-brand); color: #fff; &:hover:not(:disabled){opacity:.88;} }
-    .btn-ghost { background: transparent; color: var(--text-primary); border: 1px solid var(--surface-border); &:hover{background:var(--surface-bg);} }
   `]
 })
 export class SubscriptionsComponent implements OnInit {
   private svc = inject(SubscriptionService);
   private toast = inject(ToastService);
   router = inject(Router);
+
+  readonly CircleAlert = CircleAlert;
+  readonly Search = Search;
+  readonly DollarSign = DollarSign;
+  readonly Check = Check;
+  readonly X = X;
+  readonly TriangleAlert = TriangleAlert;
 
   subscriptions = signal<SubscriptionDto[]>([]);
   loading = signal(true);
@@ -455,11 +403,11 @@ export class SubscriptionsComponent implements OnInit {
 
   statusClass(s: SubscriptionDto['status']) {
     return {
-      EmDia: 'badge-em-dia',
-      AguardandoPagamento: 'badge-aguardando',
-      Inadimplente: 'badge-inadimplente',
-      SemFaturas: 'badge-sem-faturas',
-    }[s] ?? '';
+      EmDia: 'badge-success',
+      AguardandoPagamento: 'badge-warning',
+      Inadimplente: 'badge-danger',
+      SemFaturas: 'badge-neutral',
+    }[s] ?? 'badge-neutral';
   }
 
   formatDate(d: string | undefined | null) {

@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { LucideAngularModule, Menu, ChevronRight } from 'lucide-angular';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LayoutService } from './layout.service';
 import { filter, map, startWith } from 'rxjs/operators';
@@ -12,18 +13,18 @@ const ENV_LABEL = environment.production ? null : 'DEV';
 @Component({
   selector: 'app-admin-topbar',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, LucideAngularModule],
   template: `
     <header class="topbar">
       <div class="topbar-left">
         <button class="hamburger" (click)="layout.toggle()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <lucide-icon [img]="Menu" [size]="18" [strokeWidth]="2.5"></lucide-icon>
         </button>
         <nav class="breadcrumb">
           <a routerLink="/admin/dashboard" class="bc-root">Mangefy Admin</a>
           @if (pageLabel()) {
             <span class="bc-sep">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              <lucide-icon [img]="ChevronRight" [size]="14"></lucide-icon>
             </span>
             <span class="bc-current">{{ pageLabel() }}</span>
           }
@@ -161,6 +162,8 @@ export class AdminTopbarComponent implements OnInit, OnDestroy {
   private http   = inject(HttpClient);
   layout   = inject(LayoutService);
   envLabel = ENV_LABEL;
+  readonly Menu = Menu;
+  readonly ChevronRight = ChevronRight;
 
   apiOnline  = signal(false);
   apiChecking = signal(true);
